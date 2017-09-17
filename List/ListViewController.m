@@ -32,6 +32,7 @@
 @property (nonatomic) BOOL shouldEndPanGesture;
 
 @property (nonatomic) BOOL isKeyboardShowingCurrently;
+@property (nonatomic) BOOL isCellSwipingInProgress;
 
 @end
 
@@ -376,6 +377,15 @@
 }
 
 #pragma mark - ListTableViewCellDelegate
+- (void)isCurrentlySwipingCellAtIndex:(NSInteger)index {
+    self.isCellSwipingInProgress = YES;
+    [self dismissKeyboard];
+}
+
+- (void)isDoneSwipingCellAtIndex:(NSInteger)index {
+    self.isCellSwipingInProgress = NO;
+}
+
 - (void)didToggleStandOutStateAtIndex:(NSInteger)cellIndex isStandingOut:(BOOL)isStandingOut {
     ListItem *item = [self.itemsArray objectAtIndex:cellIndex];
     [item setIsHighlighted:isStandingOut];
@@ -404,7 +414,17 @@
 }
 
 #pragma mark - UIGestureRecognizerDelegate
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    if (gestureRecognizer == self.listPanGesture && self.isCellSwipingInProgress) {
+        return NO;
+    }
+    return YES;
+}
+
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    if (gestureRecognizer == self.listPanGesture && self.isCellSwipingInProgress) {
+        return NO;
+    }
     return YES;
 }
 

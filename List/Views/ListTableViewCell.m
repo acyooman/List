@@ -136,9 +136,9 @@
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-//    if (gestureRecognizer == self.panGesture) {
-//        return NO;
-//    }
+    if (gestureRecognizer == self.panGesture && gestureRecognizer.state == UIGestureRecognizerStateChanged) {
+        return NO;
+    }
     return YES;
 }
 
@@ -151,6 +151,9 @@
     switch (gestureRecognizer.state) {
         case UIGestureRecognizerStateBegan:{
             self.panGestureStartX = translatedPoint.x;
+            if ([self.delegate respondsToSelector:@selector(isCurrentlySwipingCellAtIndex:)]) {
+                [self.delegate isCurrentlySwipingCellAtIndex:self.cellIndex];
+            }
         }
             break;
             
@@ -173,6 +176,9 @@
                         [self.containerView setTransform:CGAffineTransformMakeTranslation(-[CommonFunctions getPhoneWidth],0.0f)];
                          }
                 }completion:^(BOOL finished) {
+                    if ([self.delegate respondsToSelector:@selector(isDoneSwipingCellAtIndex:)]) {
+                        [self.delegate isDoneSwipingCellAtIndex:self.cellIndex];
+                    }
                     if ([self.delegate respondsToSelector:@selector(didSwipeOutCellIndex:)]) {
                         [self.delegate didSwipeOutCellIndex:self.cellIndex];
                     }
@@ -213,7 +219,6 @@
 - (void)prepareForReuse {
     [super prepareForReuse];
     self.textField.text = @"";
-    [self.textField setUserInteractionEnabled:NO];
     [self.containerView setTransform:CGAffineTransformIdentity];
     [self.containerView setAlpha:1.0f];
     [self setShouldStandOut:NO];
