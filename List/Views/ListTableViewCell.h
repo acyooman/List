@@ -16,6 +16,8 @@
 - (void)didSwipeOutCellIndex:(NSInteger)cellIndex;
 - (void)didToggleStandOutStateAtIndex:(NSInteger)cellIndex isStandingOut:(BOOL)isStandingOut;
 - (void)didTapNextOnCellIndex:(NSInteger)cellIndex;
+- (void)didTapDeleteOnCellindex:(NSInteger)cellIndex;
+- (void)didTapRestoreOnCellindex:(NSInteger)cellIndex;
 
 //- (void)isCurrentlySwipingCellAtIndex:(NSInteger)index;
 //- (void)isDoneSwipingCellAtIndex:(NSInteger)index;

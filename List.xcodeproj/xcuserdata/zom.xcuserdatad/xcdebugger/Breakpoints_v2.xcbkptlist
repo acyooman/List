@@ -20,12 +20,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "List/ListViewController.m"
-            timestampString = "527370481.73858"
+            timestampString = "527372034.113368"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "469"
-            endingLineNumber = "469"
-            landmarkName = "-didBackspaceEmptyCell:"
+            startingLineNumber = "487"
+            endingLineNumber = "487"
+            landmarkName = "-didToggleStandOutStateAtIndex:isStandingOut:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -36,11 +36,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "List/ListViewController.m"
-            timestampString = "527370481.739587"
+            timestampString = "527372034.114302"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "317"
-            endingLineNumber = "317"
+            startingLineNumber = "328"
+            endingLineNumber = "328"
             landmarkName = "-markListItemDoneAtIndex:"
             landmarkType = "7">
          </BreakpointContent>
@@ -52,11 +52,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "List/ListViewController.m"
-            timestampString = "527370481.740111"
+            timestampString = "527372034.114693"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "332"
-            endingLineNumber = "332"
+            startingLineNumber = "343"
+            endingLineNumber = "343"
             landmarkName = "-saveListDataToDisk"
             landmarkType = "7">
          </BreakpointContent>
@@ -68,11 +68,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "List/Views/ListTableViewCell.m"
-            timestampString = "527370481.740423"
+            timestampString = "527372034.115047"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "192"
-            endingLineNumber = "192"
+            startingLineNumber = "207"
+            endingLineNumber = "207"
             landmarkName = "-panGestureCallback:"
             landmarkType = "7">
          </BreakpointContent>
@@ -84,11 +84,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "List/Views/ListTableViewCell.m"
-            timestampString = "527370481.740981"
+            timestampString = "527372034.115645"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "194"
-            endingLineNumber = "194"
+            startingLineNumber = "209"
+            endingLineNumber = "209"
             landmarkName = "-panGestureCallback:"
             landmarkType = "7">
          </BreakpointContent>

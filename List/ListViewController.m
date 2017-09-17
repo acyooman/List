@@ -302,6 +302,17 @@
     [self.view endEditing:YES];
 }
 
+- (void)restoreItemAtIndex:(NSInteger)index {
+    ListItem *item = [self.itemsArray objectAtIndex:index];
+    item.isDone = NO;
+    item.dateOfMarkingDone = [NSDate date];
+    [self.itemsArray replaceObjectAtIndex:index withObject:item];
+    [self.listTableView reloadData];
+    [self.pastTableView reloadData];
+    [self saveListDataToDisk];
+}
+
+
 - (void)markListItemDoneAtIndex:(NSInteger)index {
     ListItem *item = [self.itemsArray objectAtIndex:index];
     
@@ -447,6 +458,13 @@
 //- (void)isDoneSwipingCellAtIndex:(NSInteger)index {
 //    self.isCellSwipingInProgress = NO;
 //}
+- (void)didTapRestoreOnCellindex:(NSInteger)cellIndex {
+    [self restoreItemAtIndex:cellIndex];
+}
+
+- (void)didTapDeleteOnCellindex:(NSInteger)cellIndex {
+    [self removeListItemAtIndex:cellIndex];
+}
 
 - (void)didToggleStandOutStateAtIndex:(NSInteger)cellIndex isStandingOut:(BOOL)isStandingOut {
     ListItem *item = [self.itemsArray objectAtIndex:cellIndex];

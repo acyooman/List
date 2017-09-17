@@ -55,10 +55,12 @@
     //Buttons
     //restore button
     self.restoreButton = [self getListButtonWithX:0.0f text:@"Restore"];
+    [self.restoreButton addTarget:self action:@selector(didTapRestoreButton) forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:self.restoreButton];
     
     //delete button
     self.deleteButton = [self getListButtonWithX:[CommonFunctions getPhoneWidth]/2 text:@"Delete"];
+    [self.deleteButton addTarget:self action:@selector(didTapdeleteButton) forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:self.deleteButton];
     
     //container view
@@ -110,8 +112,8 @@
 - (UIButton *)getListButtonWithX:(CGFloat)x text:(NSString *)text {
     UIButton *actionButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [actionButton setTitle:text forState:UIControlStateNormal];
-    [actionButton.titleLabel setFont:FontSemibold(18)];
-    [actionButton setTitleColor:UIColorFromRGB(ColorWhite) forState:UIControlStateNormal];
+    [actionButton.titleLabel setFont:FontRegular(18)];
+    [actionButton setTitleColor:UIColorFromRGB(ColorLessDarkBG) forState:UIControlStateNormal];
     [actionButton setFrame:CGRectMake(x, 0, [CommonFunctions getPhoneWidth]/2, self.bounds.size.height)];
     [actionButton setUserInteractionEnabled:NO];
     
@@ -136,6 +138,19 @@
         [self.textField becomeFirstResponder];
     }else{
         [self.textField resignFirstResponder];
+    }
+}
+
+#pragma mark - Button Delegates
+- (void)didTapRestoreButton {
+    if([self.delegate respondsToSelector:@selector(didTapRestoreOnCellindex:)]) {
+        [self.delegate didTapRestoreOnCellindex:self.cellIndex];
+    }
+}
+
+- (void)didTapDeleteButton {
+    if([self.delegate respondsToSelector:@selector(didTapDeleteOnCellindex:)]) {
+        [self.delegate didTapDeleteOnCellindex:self.cellIndex];
     }
 }
 
@@ -217,7 +232,10 @@
         //        [self.containerView setAlpha:0.0f];
         [self.containerView setTransform:CGAffineTransformMakeTranslation([CommonFunctions getPhoneWidth],0.0f)];
     }completion:^(BOOL finished) {
-        [self swipeOffCompleted];
+        if (!self.listItem.isDone) {
+            [self swipeOffCompleted];
+        }
+        
     }];
 }
 
@@ -226,7 +244,9 @@
         //        [self.containerView setAlpha:0.0f];
         [self.containerView setTransform:CGAffineTransformMakeTranslation(-[CommonFunctions getPhoneWidth],0.0f)];
     }completion:^(BOOL finished) {
-        [self swipeOffCompleted];
+        if (!self.listItem.isDone) {
+            [self swipeOffCompleted];
+        }
     }];
 }
 
