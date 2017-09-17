@@ -7,10 +7,13 @@
 //
 
 #import "ListTableViewCell.h"
+#import "ItemTextField.h"
 #import "CommonFunctions.h"
 
-@interface ListTableViewCell () <UITextFieldDelegate, UIGestureRecognizerDelegate>
-@property (nonatomic, strong) UITextField *textField;
+@interface ListTableViewCell () <UITextFieldDelegate, UIGestureRecognizerDelegate, ItemTextFieldDelegate>
+@property (nonatomic, strong) UIView *bottomSeparator;
+
+@property (nonatomic, strong) ItemTextField *textField;
 @property (nonatomic, strong) UIView *containerView;
 @property (nonatomic, strong) CAGradientLayer *highlightingLayer;
 @property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
@@ -18,6 +21,10 @@
 @property (nonatomic) CGFloat panGestureStartX;
 @property (nonatomic) CGFloat panGestureDeltaX;
 @property (nonatomic) BOOL shouldEndPanGesture;
+
+@property (nonatomic, strong) ListItem *listItem;
+@property (nonatomic)BOOL shouldStandOut;
+
 @end
 
 @implementation ListTableViewCell
@@ -29,7 +36,7 @@
         [self setDefaults];
         [self createViews];
         [self setShouldStandOut:NO];
-        [self subscribeToNotifications];
+        //        [self subscribeToNotifications];
     }
     
     return self;
@@ -41,15 +48,9 @@
     [self setBackgroundColor:[UIColor clearColor]];
 }
 
-- (void)subscribeToNotifications {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didScrollListNotificationCallback) name:@"NotificationDidScrollList" object:nil];
-}
-
-- (void)didScrollListNotificationCallback {
-    if ([self isFirstResponder]) {
-        [self resignFirstResponder];
-    }
-}
+//- (void)subscribeToNotifications {
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(shouldHideKeyboardCallback) name:@"NotificationShouldHideKeyboard" object:nil];
+//}
 
 - (void)createViews {
     //container view
@@ -70,6 +71,11 @@
     [self.highlightingLayer setColors:[self getGradientColorsArray]];
     [self.containerView.layer insertSublayer:self.highlightingLayer atIndex:0];
     
+    //bottom separator
+    //    self.bottomSeparator = [[UIView alloc] initWithFrame:CGRectMake(24, self.bounds.size.height-0.5, [CommonFunctions getPhoneWidth]-24*2, 0.5f)];
+    //    [self.bottomSeparator setBackgroundColor:UIColorFromRGB(ColorSeparator)];
+    
+    
     //pan gesture for swipe
     self.panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureCallback:)];
     [self.containerView addGestureRecognizer:self.panGesture];
@@ -77,7 +83,7 @@
     [self.panGesture setEnabled:YES];
     
     //text field
-    self.textField = [[UITextField alloc] initWithFrame:CGRectMake(24, 20, [CommonFunctions getPhoneWidth]-40, 24)];
+    self.textField = [[ItemTextField alloc] initWithFrame:CGRectMake(24, 20, [CommonFunctions getPhoneWidth]-40, 24)];
     [self.containerView addSubview:self.textField];
     [self.textField setDelegate:self];
     
@@ -92,7 +98,7 @@
     [self.textField setKeyboardAppearance:UIKeyboardAppearanceDark];
     [self.textField setAdjustsFontSizeToFitWidth:YES];
     [self.textField setReturnKeyType:UIReturnKeyNext];
-    [self.textField setEnablesReturnKeyAutomatically:YES];
+    //    [self.textField setEnablesReturnKeyAutomatically:YES];
     
     //DOUBLE TAP GESTURE
     UITapGestureRecognizer *doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureCallback)];
@@ -118,11 +124,14 @@
 }
 
 #pragma mark - UIGestureRecognizerDelegate
--(BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)gestureRecognizer {
-    CGPoint translation = [gestureRecognizer translationInView:[self superview]];
-    // Check for horizontal gesture
-    if (fabs(translation.x) > fabs(translation.y)) {
-        return YES;
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    if (gestureRecognizer == self.panGesture) {
+        UIPanGestureRecognizer *panGesture = (UIPanGestureRecognizer *)gestureRecognizer;
+        CGPoint translation = [panGesture translationInView:[self superview]];
+        // Check for horizontal gesture
+        if (fabs(translation.x) > fabs(translation.y)) {
+            return YES;
+        }
     }
     return NO;
 }
@@ -188,6 +197,10 @@
 
 #pragma mark - Double Tap Interaction
 - (void)doubleTapGestureCallback {
+    if (self.listItem.isDone) {
+        return;
+    }
+    
     [self setSelected:NO animated:NO];
     [self setShouldStandOut:!self.shouldStandOut];
 }
@@ -212,9 +225,9 @@
     return [NSArray arrayWithObjects:(id)[startColor CGColor], (id)[endColor CGColor], nil];
 }
 
-#pragma mark - UITextFieldDelegate
+#pragma mark - UITextFieldDelegate, ItemTextFieldDelegate
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    if (self.textField.text.length > 0) {
+    if (textField.text.length > 0) {
         if ([self.delegate respondsToSelector:@selector(didTapNextOnCellIndex:)]) {
             [self.delegate didTapNextOnCellIndex:self.cellIndex];
             return YES;
@@ -225,6 +238,13 @@
     }
     return NO;
 }
+
+- (void)didDeleteBackward {
+    if ([self.delegate respondsToSelector:@selector(didBackspaceEmptyCell:)]) {
+        [self.delegate didBackspaceEmptyCell:self.cellIndex];
+    }
+}
+
 
 #pragma mark - Setters
 
@@ -241,8 +261,12 @@
     }];
 }
 
-- (void)setItemText:(NSString *)text{
-    [self.textField setText:text];
+- (void)setListItem:(ListItem *)listItem {
+    _listItem = listItem;
+    [self.textField setText:listItem.text];
+    if (!listItem.isDone) {
+        [self setShouldStandOut:listItem.isHighlighted];
+    }
 }
 
 #pragma mark - Notification
@@ -259,12 +283,6 @@
 
 - (void)textFieldDidEndEditing:(UITextField *)textField{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-
-    if (!self.textField.text.length) {
-        if ([self.delegate respondsToSelector:@selector(didFinishEmptyEditingAtCellIndex:)]) {
-            [self.delegate didFinishEmptyEditingAtCellIndex:self.cellIndex];
-        }
-    }
 }
 
 

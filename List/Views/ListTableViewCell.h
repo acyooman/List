@@ -7,11 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ListItem.h"
 
 @protocol ListTableViewCellDelegate <NSObject>
 
 - (void)didUpdateWithText:(NSString *)text cellIndex:(NSInteger)cellIndex;
-- (void)didFinishEmptyEditingAtCellIndex:(NSInteger)cellIndex;
+- (void)didBackspaceEmptyCell:(NSInteger)cellIndex;
 - (void)didSwipeOutCellIndex:(NSInteger)cellIndex;
 - (void)didToggleStandOutStateAtIndex:(NSInteger)cellIndex isStandingOut:(BOOL)isStandingOut;
 - (void)didTapNextOnCellIndex:(NSInteger)cellIndex;
@@ -20,11 +21,9 @@
 
 @interface ListTableViewCell : UITableViewCell
 
-@property (nonatomic) BOOL shouldStandOut;
+@property (nonatomic)NSInteger cellIndex;
+@property (nonatomic, weak)id<ListTableViewCellDelegate> delegate;
 
-@property (nonatomic) NSInteger cellIndex;
-@property (nonatomic)id<ListTableViewCellDelegate> delegate;
-
-- (void)setItemText:(NSString *)text;
+- (void)setListItem:(ListItem *)listItem;
 
 @end
