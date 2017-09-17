@@ -28,6 +28,10 @@
 @property (nonatomic, strong) UIButton *deleteButton;
 @property (nonatomic, strong) UIButton *restoreButton;
 
+@property (nonatomic, strong) UITapGestureRecognizer *doubleTapGesture;
+
+@property (nonatomic) NSInteger backspaceCount;
+
 @end
 
 @implementation ListTableViewCell
@@ -49,6 +53,7 @@
     [self setSelectionStyle:UITableViewCellSelectionStyleNone];
     [self setSelected:NO];
     [self setBackgroundColor:[UIColor clearColor]];
+    self.backspaceCount = 0;
 }
 
 - (void)createViews {
@@ -60,7 +65,7 @@
     
     //delete button
     self.deleteButton = [self getListButtonWithX:[CommonFunctions getPhoneWidth]/2 text:@"Delete"];
-    [self.deleteButton addTarget:self action:@selector(didTapdeleteButton) forControlEvents:UIControlEventTouchUpInside];
+    [self.deleteButton addTarget:self action:@selector(didTapDeleteButton) forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:self.deleteButton];
     
     //container view
@@ -104,9 +109,9 @@
     [self.textField setReturnKeyType:UIReturnKeyNext];
     
     //DOUBLE TAP GESTURE
-    UITapGestureRecognizer *doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureCallback)];
-    [doubleTapGesture setNumberOfTapsRequired:2];
-    [self.containerView addGestureRecognizer:doubleTapGesture];
+    self.doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureCallback)];
+    [self.doubleTapGesture setNumberOfTapsRequired:2];
+    [self.containerView addGestureRecognizer:self.doubleTapGesture];
 }
 
 - (UIButton *)getListButtonWithX:(CGFloat)x text:(NSString *)text {
@@ -115,7 +120,6 @@
     [actionButton.titleLabel setFont:FontRegular(18)];
     [actionButton setTitleColor:UIColorFromRGB(ColorLessDarkBG) forState:UIControlStateNormal];
     [actionButton setFrame:CGRectMake(x, 0, [CommonFunctions getPhoneWidth]/2, self.bounds.size.height)];
-    [actionButton setUserInteractionEnabled:NO];
     
     return actionButton;
 }
@@ -143,14 +147,14 @@
 
 #pragma mark - Button Delegates
 - (void)didTapRestoreButton {
-    if([self.delegate respondsToSelector:@selector(didTapRestoreOnCellindex:)]) {
-        [self.delegate didTapRestoreOnCellindex:self.cellIndex];
+    if([self.delegate respondsToSelector:@selector(didTapRestoreOnCellIndex:)]) {
+        [self.delegate didTapRestoreOnCellIndex:self.cellIndex];
     }
 }
 
 - (void)didTapDeleteButton {
-    if([self.delegate respondsToSelector:@selector(didTapDeleteOnCellindex:)]) {
-        [self.delegate didTapDeleteOnCellindex:self.cellIndex];
+    if([self.delegate respondsToSelector:@selector(didTapDeleteOnCellIndex:)]) {
+        [self.delegate didTapDeleteOnCellIndex:self.cellIndex];
     }
 }
 
@@ -280,10 +284,10 @@
 #pragma mark - Reuse
 - (void)prepareForReuse {
     [super prepareForReuse];
+    self.backspaceCount = 0;
     self.textField.text = @"";
     [self.containerView setTransform:CGAffineTransformIdentity];
     [self.containerView setAlpha:1.0f];
-    [self setShouldStandOut:NO];
 }
 
 #pragma mark - Helpers
@@ -308,9 +312,14 @@
 
 - (void)didDeleteBackward:(ItemTextField *)textField {
     if(textField.text.length == 0) {
-        if ([self.delegate respondsToSelector:@selector(didBackspaceEmptyCell:)]) {
-            [self.delegate didBackspaceEmptyCell:self.cellIndex];
+        self.backspaceCount += 1;
+        if (self.backspaceCount == 2) {
+            self.backspaceCount = 0;
+            if ([self.delegate respondsToSelector:@selector(didBackspaceEmptyCell:)]) {
+                [self.delegate didBackspaceEmptyCell:self.cellIndex];
+            }
         }
+        
     }
 }
 

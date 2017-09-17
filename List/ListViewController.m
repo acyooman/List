@@ -325,7 +325,7 @@
         [self saveListDataToDisk];
     }else {
         //just delete the blank items when swiped away
-        [self removeListItemAtIndex:index];
+        [self removeListItemAtIndex:index shouldMoveUp:NO];
     }
 }
 
@@ -411,15 +411,16 @@
     }];
 }
 
-- (void)removeListItemAtIndex:(NSInteger)index {
+- (void)removeListItemAtIndex:(NSInteger)index shouldMoveUp:(BOOL)shouldMoveUp{
     [self.itemsArray removeObjectAtIndex:index];
     [self.listTableView reloadData];
     [self.pastTableView reloadData];
     
     [self saveListDataToDisk];
     
-    if (index > 0) {
-        [self.listTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:index-1 inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
+    if (index > 0 && shouldMoveUp) {
+        [self.listTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:index-1 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionMiddle];
+//        [self.listTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:index-1 inSection:0] atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
     }
 }
 
@@ -430,7 +431,7 @@
     [self.pastTableView reloadData];
     
     [self saveListDataToDisk];
-    [self.listTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
+    [self.listTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0] animated:YES scrollPosition:UITableViewScrollPositionMiddle];
 }
 
 - (void)addNewItemAtTheEnd {
@@ -446,7 +447,7 @@
     }
     
     [self saveListDataToDisk];
-    [self.listTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.itemsArray.count-1 inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
+    [self.listTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.itemsArray.count-1 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionMiddle];
 }
 
 #pragma mark - ListTableViewCellDelegate
@@ -458,12 +459,12 @@
 //- (void)isDoneSwipingCellAtIndex:(NSInteger)index {
 //    self.isCellSwipingInProgress = NO;
 //}
-- (void)didTapRestoreOnCellindex:(NSInteger)cellIndex {
+- (void)didTapRestoreOnCellIndex:(NSInteger)cellIndex {
     [self restoreItemAtIndex:cellIndex];
 }
 
-- (void)didTapDeleteOnCellindex:(NSInteger)cellIndex {
-    [self removeListItemAtIndex:cellIndex];
+- (void)didTapDeleteOnCellIndex:(NSInteger)cellIndex {
+    [self removeListItemAtIndex:cellIndex shouldMoveUp:NO];
 }
 
 - (void)didToggleStandOutStateAtIndex:(NSInteger)cellIndex isStandingOut:(BOOL)isStandingOut {
@@ -485,7 +486,7 @@
 
 - (void)didBackspaceEmptyCell:(NSInteger)cellIndex {
     if (cellIndex > 0) {
-        [self removeListItemAtIndex:cellIndex];
+        [self removeListItemAtIndex:cellIndex shouldMoveUp:NO];
     }
 }
 
