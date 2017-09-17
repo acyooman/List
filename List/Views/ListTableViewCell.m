@@ -25,6 +25,9 @@
 @property (nonatomic, strong) ListItem *listItem;
 @property (nonatomic)BOOL shouldStandOut;
 
+@property (nonatomic, strong) UIButton *deleteButton;
+@property (nonatomic, strong) UIButton *restoreButton;
+
 @end
 
 @implementation ListTableViewCell
@@ -48,20 +51,19 @@
     [self setBackgroundColor:[UIColor clearColor]];
 }
 
-//- (void)subscribeToNotifications {
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(shouldHideKeyboardCallback) name:@"NotificationShouldHideKeyboard" object:nil];
-//}
-
 - (void)createViews {
+    //Buttons
+    //restore button
+    self.restoreButton = [self getListButtonWithX:0.0f text:@"Restore"];
+    [self.contentView addSubview:self.restoreButton];
+    
+    //delete button
+    self.deleteButton = [self getListButtonWithX:[CommonFunctions getPhoneWidth]/2 text:@"Delete"];
+    [self.contentView addSubview:self.deleteButton];
+    
     //container view
     self.containerView = [[UIView alloc] initWithFrame:self.bounds];
-    [self.containerView setBackgroundColor:[UIColor clearColor]];
-    [self.contentView setBackgroundColor:[UIColor clearColor]];
     [self.contentView addSubview:self.containerView];
-    
-    //colors
-    [self.containerView setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
-    [self.contentView setBackgroundColor:UIColorFromRGB(ColorLessDarkBG)];
     
     //highlighting
     self.highlightingLayer = [CAGradientLayer layer];
@@ -96,7 +98,7 @@
     //text field - keyboard
     [self.textField setKeyboardType:UIKeyboardTypeDefault];
     [self.textField setKeyboardAppearance:UIKeyboardAppearanceDark];
-    [self.textField setAdjustsFontSizeToFitWidth:YES];
+//    [self.textField setAdjustsFontSizeToFitWidth:YES];
     [self.textField setReturnKeyType:UIReturnKeyNext];
     
     //DOUBLE TAP GESTURE
@@ -105,8 +107,23 @@
     [self.containerView addGestureRecognizer:doubleTapGesture];
 }
 
+- (UIButton *)getListButtonWithX:(CGFloat)x text:(NSString *)text {
+    UIButton *actionButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [actionButton setTitle:text forState:UIControlStateNormal];
+    [actionButton.titleLabel setFont:FontSemibold(18)];
+    [actionButton setTitleColor:UIColorFromRGB(ColorWhite) forState:UIControlStateNormal];
+    [actionButton setFrame:CGRectMake(x, 0, [CommonFunctions getPhoneWidth]/2, self.bounds.size.height)];
+    [actionButton setUserInteractionEnabled:NO];
+    
+    return actionButton;
+}
+
 - (void)layoutSubviews {
     [super layoutSubviews];
+    
+    [self.restoreButton setFrameHeight:self.bounds.size.height];
+    [self.deleteButton setFrameHeight:self.bounds.size.height];
+    
     [self.containerView setFrame:self.bounds];
     [self.highlightingLayer setFrame:self.bounds];
     [self.containerView setTransform:CGAffineTransformIdentity];
@@ -127,6 +144,7 @@
     if (gestureRecognizer == self.panGesture) {
         UIPanGestureRecognizer *panGesture = (UIPanGestureRecognizer *)gestureRecognizer;
         CGPoint translation = [panGesture translationInView:[self superview]];
+        
         // Check for horizontal gesture
         if (fabs(translation.x) > fabs(translation.y)) {
             return YES;
@@ -145,21 +163,18 @@
 #pragma mark  - Pan Gesture Stuff
 - (void)panGestureCallback:(UIPanGestureRecognizer *)gestureRecognizer {
     CGPoint translatedPoint = [gestureRecognizer translationInView:self];
-    //    CGPoint velocityInView = [gestureRecognizer velocityInView:self];
+        CGPoint velocityInView = [gestureRecognizer velocityInView:self];
     CGFloat dismissThresh = [CommonFunctions getPhoneWidth]/2;
     
     switch (gestureRecognizer.state) {
         case UIGestureRecognizerStateBegan:{
             self.panGestureStartX = translatedPoint.x;
-            if ([self.delegate respondsToSelector:@selector(isCurrentlySwipingCellAtIndex:)]) {
-                [self.delegate isCurrentlySwipingCellAtIndex:self.cellIndex];
-            }
         }
             break;
             
         case UIGestureRecognizerStateChanged:{
             self.panGestureDeltaX = translatedPoint.x - self.panGestureStartX;
-            NSLog(@"Pangesture delta = %@\ntranslatedPoint = %@", @(self.panGestureDeltaX), @(translatedPoint));
+            NSLog(@"Pangesture delta = %@\ntranslatedPoint = %@, velocity = %@", @(self.panGestureDeltaX), @(translatedPoint), @(velocityInView));
             [self.containerView setTransform:CGAffineTransformMakeTranslation(self.panGestureDeltaX, 0.0f)];
         }
             break;
@@ -167,36 +182,63 @@
         case UIGestureRecognizerStateCancelled:
         case UIGestureRecognizerStateEnded: {
             if (fabs(self.panGestureDeltaX) > dismissThresh) {
-                [UIView animateWithDuration:0.2 animations:^{
-                    [self.containerView setAlpha:0.0f];
-                    
-                    if (self.panGestureDeltaX > 0) {
-                        [self.containerView setTransform:CGAffineTransformMakeTranslation([CommonFunctions getPhoneWidth],0.0f)];
-                         }else {
-                        [self.containerView setTransform:CGAffineTransformMakeTranslation(-[CommonFunctions getPhoneWidth],0.0f)];
-                         }
-                }completion:^(BOOL finished) {
-                    if ([self.delegate respondsToSelector:@selector(isDoneSwipingCellAtIndex:)]) {
-                        [self.delegate isDoneSwipingCellAtIndex:self.cellIndex];
-                    }
-                    if ([self.delegate respondsToSelector:@selector(didSwipeOutCellIndex:)]) {
-                        [self.delegate didSwipeOutCellIndex:self.cellIndex];
-                    }
-                }];
-                
+                if (self.panGestureDeltaX > 0) {
+                    [self swipeOffToRight];
+                }else {
+                    [self swipeOffToLeft];
+                }
+            }else if (fabs(velocityInView.y) > 200.f) {
+                if (velocityInView.y > 0) {
+                    [self swipeOffToLeft];
+                }else {
+                    [self swipeOffToRight];
+                }
             }else {
-                [UIView animateWithDuration:0.2 animations:^{
-                    [self.containerView setAlpha:1.0f];
-                    [self.containerView setTransform:CGAffineTransformIdentity];
-                }completion:^(BOOL finished) {
-                    
-                }];
+                [self resetSwipeToCenter];
             }
         }
             break;
             
         default:
             break;
+    }
+}
+
+- (void)resetSwipeToCenter {
+    [UIView animateWithDuration:0.3 animations:^{
+        //        [self.containerView setAlpha:1.0f];
+        [self.containerView setTransform:CGAffineTransformIdentity];
+    }completion:^(BOOL finished) {
+    }];
+}
+
+- (void)swipeOffToRight {
+    [UIView animateWithDuration:0.3 animations:^{
+        //        [self.containerView setAlpha:0.0f];
+        [self.containerView setTransform:CGAffineTransformMakeTranslation([CommonFunctions getPhoneWidth],0.0f)];
+    }completion:^(BOOL finished) {
+        [self swipeOffCompleted];
+    }];
+}
+
+- (void)swipeOffToLeft {
+    [UIView animateWithDuration:0.5 animations:^{
+        //        [self.containerView setAlpha:0.0f];
+        [self.containerView setTransform:CGAffineTransformMakeTranslation(-[CommonFunctions getPhoneWidth],0.0f)];
+    }completion:^(BOOL finished) {
+        [self swipeOffCompleted];
+    }];
+}
+
+- (void)swipeOffCompleted {
+    if (self.listItem.isDone) {
+        if ([self.delegate respondsToSelector:@selector(didSwipeOutCellIndex:)]) {
+            [self.delegate didSwipeOutCellIndex:self.cellIndex];
+        }
+    }else {
+        if ([self.delegate respondsToSelector:@selector(didSwipeOutCellIndex:)]) {
+            [self.delegate didSwipeOutCellIndex:self.cellIndex];
+        }
     }
 }
 
@@ -271,8 +313,26 @@
 - (void)setListItem:(ListItem *)listItem {
     _listItem = listItem;
     [self.textField setText:listItem.text];
-    if (!listItem.isDone) {
-        [self setShouldStandOut:listItem.isHighlighted];
+    
+    [self setCellDoneStuff:listItem.isDone];
+}
+
+- (void)setCellDoneStuff:(BOOL)isDone {
+    if (isDone) {
+        [self setShouldStandOut:NO];
+        [self.containerView setBackgroundColor:UIColorFromRGB(ColorLessDarkBG)];
+        [self.contentView setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
+        [self.textField setEnabled:NO];
+        [self.restoreButton setAlpha:1.0f];
+        [self.deleteButton setAlpha:1.0f];
+        //        [self setUserInteractionEnabled:NO];
+    }else {
+        [self setShouldStandOut:self.listItem.isHighlighted];
+        [self.textField setEnabled:YES];
+        [self.containerView setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
+        [self.contentView setBackgroundColor:UIColorFromRGB(ColorLessDarkBG)];
+        [self.restoreButton setAlpha:0.0f];
+        [self.deleteButton setAlpha:0.0f];
     }
 }
 

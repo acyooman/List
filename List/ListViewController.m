@@ -32,7 +32,7 @@
 @property (nonatomic) BOOL shouldEndPanGesture;
 
 @property (nonatomic) BOOL isKeyboardShowingCurrently;
-@property (nonatomic) BOOL isCellSwipingInProgress;
+//@property (nonatomic) BOOL isCellSwipingInProgress;
 
 @end
 
@@ -76,7 +76,37 @@
 
 #pragma mark - Create Views
 - (void)createViews {
+    [self createPastViews];
     [self createListViews];
+}
+
+- (void)createPastViews {
+    //past container view
+    self.pastContainerView = [[UIView alloc] init];
+    [self.pastContainerView setBackgroundColor:UIColorFromRGB(ColorLessDarkBG)];
+    [self.pastContainerView setFrame:CGRectMake(0, 0, [CommonFunctions getPhoneWidth], [CommonFunctions getPhoneHeight])];
+    [self.view addSubview:self.pastContainerView];
+    
+    //table view
+    self.pastTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, [CommonFunctions getPhoneWidth], [CommonFunctions getPhoneHeight]) style:UITableViewStylePlain];
+    [self.pastTableView setTableHeaderView:[self getPastHeaderView]];
+    [self.pastContainerView addSubview:self.pastTableView];
+    
+    //customize
+    [self.pastTableView setAllowsMultipleSelectionDuringEditing:NO];
+    [self.pastTableView setBackgroundColor:[UIColor clearColor]];
+    [self.pastTableView setDataSource:self];
+    [self.pastTableView setDelegate:self];
+    [self.pastTableView setTableFooterView:[[UIView alloc] initWithFrame:CGRectMake(0, 0, [CommonFunctions getPhoneWidth], 200.0)]];
+    [self.pastTableView setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, 100.0f, 0)];
+    
+    //separators
+    [self.pastTableView setSeparatorColor:UIColorFromRGB(ColorSeparator)];
+    
+    //patch view
+    UIView *patchView = [[UIView alloc] initWithFrame:CGRectMake(0, [CommonFunctions getPhoneHeight] - 40.0f, [CommonFunctions getPhoneWidth], 40.0f)];
+    [self.pastContainerView addSubview:patchView];
+    [patchView setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
 }
 
 - (void)createListViews {
@@ -103,9 +133,8 @@
     //separators
     [self.listTableView setSeparatorColor:UIColorFromRGB(ColorSeparator)];
     
-    //
+    //gestures
     [self setupListGestures];
-    
 }
 
 - (void)setupListGestures {
@@ -133,6 +162,16 @@
         NSMutableArray *diskArray = [[NSMutableArray alloc] init];
         diskArray = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] valueForKey:@"listArrayData"]];
         
+        //done values
+        NSMutableArray *doneValuesArray = [[NSMutableArray alloc] init];
+        if([[NSUserDefaults standardUserDefaults] valueForKey:@"doneValuesData"]){
+            doneValuesArray = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] valueForKey:@"doneValuesData"]];
+        }else {
+            for (NSInteger i=0; i<diskArray.count; i++) {
+                [doneValuesArray addObject:@(0)];
+            }
+        }
+        
         //highlights
         NSMutableArray *highlightsArray = [[NSMutableArray alloc] init];
         if([[NSUserDefaults standardUserDefaults] valueForKey:@"highlightsData"]){
@@ -154,13 +193,16 @@
             NSNumber *tempNumber = [highlightsArray objectAtIndex:i];
             listItem.isHighlighted = tempNumber.boolValue;
             
+            tempNumber = [doneValuesArray objectAtIndex:i];
+            listItem.isDone = tempNumber.boolValue;
+            
             [tempObjectsArray addObject:listItem];
         }
         
         self.itemsArray = [NSMutableArray arrayWithArray:tempObjectsArray];
         
     }else {
-        NSArray *startArray = @[[ListItem itemWithText:@"Swipe 👉 or 👈 to past"],
+        NSArray *startArray = @[[ListItem itemWithText:@"Swipe 👉 or 👈 to send this to past"],
                                 [ListItem itemWithText:@"Pull down this list to see past stuff ⏬"],
                                 [ListItem itemWithText:@"Double tap to highlight 👆👆"],
                                 [ListItem itemWithText:@"Be awesome now 😘"]
@@ -171,6 +213,10 @@
     //scroll position
     self.scrollPosn = [[NSUserDefaults standardUserDefaults] floatForKey:@"listScrollValue"];
     self.currentlySelectedItem = -1;
+    
+    //reload tables
+    [self.pastTableView reloadData];
+    [self.listTableView reloadData];
 }
 
 #pragma mark - UITableViewDataSource
@@ -195,6 +241,9 @@
             [cell setCellIndex:indexPath.row];
             [cell setDelegate:self];
             [cell setSelected:NO];
+            [cell setHidden:NO];
+        }else {
+            [cell setHidden:YES];
         }
         return cell;
     }
@@ -211,7 +260,11 @@
             [cell setCellIndex:indexPath.row];
             [cell setDelegate:self];
             [cell setSelected:NO];
+            [cell setHidden:NO];
+        }else {
+            [cell setHidden:YES];
         }
+        return cell;
     }
     
     return [[UITableViewCell alloc] init];
@@ -251,29 +304,34 @@
 
 - (void)markListItemDoneAtIndex:(NSInteger)index {
     ListItem *item = [self.itemsArray objectAtIndex:index];
-    item.isDone = YES;
-    item.dateOfMarkingDone = [NSDate date];
-    [self.listTableView reloadData];
-    [self saveListDataToDisk];
+    
+    if (item.text.length > 0) {
+        item.isDone = YES;
+        item.dateOfMarkingDone = [NSDate date];
+        [self.itemsArray replaceObjectAtIndex:index withObject:item];
+        [self.listTableView reloadData];
+        [self.pastTableView reloadData];
+        [self saveListDataToDisk];
+    }else {
+        //just delete the blank items when swiped away
+        [self removeListItemAtIndex:index];
+    }
 }
 
 - (void)saveListDataToDisk {
     NSMutableArray *listStringsArray = [[NSMutableArray alloc] init];
-    NSMutableArray *doneStringsArray = [[NSMutableArray alloc] init];
     NSMutableArray *highlightNumbersArray = [[NSMutableArray alloc] init];
+    NSMutableArray *doneNumbersArray = [[NSMutableArray alloc] init];
+    
     for (ListItem *item in self.itemsArray) {
-        if (item.isDone) {
-            [doneStringsArray addObject:item.text];
-        }else {
-            [listStringsArray addObject:item.text];
-        }
+        [listStringsArray addObject:item.text];
         [highlightNumbersArray addObject:@(item.isHighlighted)];
+        [doneNumbersArray addObject:@(item.isDone)];
     }
     
+    [[NSUserDefaults standardUserDefaults] setValue:doneNumbersArray forKey:@"doneValuesData"];
     [[NSUserDefaults standardUserDefaults] setValue:highlightNumbersArray forKey:@"highlightsData"];
     [[NSUserDefaults standardUserDefaults] setValue:listStringsArray forKey:@"listArrayData"];
-    [[NSUserDefaults standardUserDefaults] setValue:listStringsArray forKey:@"listDataBackup"];
-    [[NSUserDefaults standardUserDefaults] setValue:doneStringsArray forKey:@"listDataDone"];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
@@ -281,7 +339,7 @@
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [CommonFunctions getPhoneWidth], 68+24)];
     
     UILabel *headingLabel = [[UILabel alloc] initWithFrame:CGRectMake(24, 24, [CommonFunctions getPhoneWidth], 68)];
-    [headingLabel setText:@"List"];
+    [headingLabel setText:@"Next"];
     [headingLabel setFont:FontBold(50)];
     [headingLabel setTextColor:[UIColor whiteColor]];
     
@@ -295,7 +353,7 @@
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [CommonFunctions getPhoneWidth], 68+24)];
     
     UILabel *headingLabel = [[UILabel alloc] initWithFrame:CGRectMake(24, 24, [CommonFunctions getPhoneWidth], 68)];
-    [headingLabel setText:@"Past."];
+    [headingLabel setText:@"Past"];
     [headingLabel setFont:FontBold(50)];
     [headingLabel setTextColor:[UIColor whiteColor]];
     
@@ -326,13 +384,14 @@
     [UIView animateWithDuration:0.5f delay:0.0f usingSpringWithDamping:0.7f initialSpringVelocity:0.3f options:UIViewAnimationOptionCurveEaseIn animations:^{
         [self.listContainerView setFrameY:[CommonFunctions getPhoneHeight] - 100.0f];
     } completion:^(BOOL finished) {
-          [self.listPanGesture setEnabled:NO];
         [self.listSwipeGesture setEnabled:YES];
+        [self.listPanGesture setEnabled:NO];
     }];
 }
 
 - (void)maximizeListContainer {
-    [UIView animateWithDuration:0.5f delay:0.0 usingSpringWithDamping:0.8f initialSpringVelocity:0.3f options:UIViewAnimationOptionCurveEaseIn animations:^{
+    [self.listTableView setScrollEnabled:YES];
+    [UIView animateWithDuration:0.5f delay:0.0 usingSpringWithDamping:0.8f initialSpringVelocity:0.3f options:UIViewAnimationOptionCurveEaseIn|UIViewAnimationOptionAllowUserInteraction animations:^{
         [self.listContainerView setFrameY:0.0f];
         [self.view setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
     } completion:^(BOOL finished) {
@@ -344,6 +403,8 @@
 - (void)removeListItemAtIndex:(NSInteger)index {
     [self.itemsArray removeObjectAtIndex:index];
     [self.listTableView reloadData];
+    [self.pastTableView reloadData];
+    
     [self saveListDataToDisk];
     
     if (index > 0) {
@@ -355,6 +416,7 @@
     ListItem *newListItem = [ListItem itemWithText:@""];
     [self.itemsArray insertObject:newListItem atIndex:index];
     [self.listTableView reloadData];
+    [self.pastTableView reloadData];
     
     [self saveListDataToDisk];
     [self.listTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
@@ -377,14 +439,14 @@
 }
 
 #pragma mark - ListTableViewCellDelegate
-- (void)isCurrentlySwipingCellAtIndex:(NSInteger)index {
-    self.isCellSwipingInProgress = YES;
-    [self dismissKeyboard];
-}
+//- (void)isCurrentlySwipingCellAtIndex:(NSInteger)index {
+//    self.isCellSwipingInProgress = YES;
+//    [self dismissKeyboard];
+//}
 
-- (void)isDoneSwipingCellAtIndex:(NSInteger)index {
-    self.isCellSwipingInProgress = NO;
-}
+//- (void)isDoneSwipingCellAtIndex:(NSInteger)index {
+//    self.isCellSwipingInProgress = NO;
+//}
 
 - (void)didToggleStandOutStateAtIndex:(NSInteger)cellIndex isStandingOut:(BOOL)isStandingOut {
     ListItem *item = [self.itemsArray objectAtIndex:cellIndex];
@@ -414,17 +476,10 @@
 }
 
 #pragma mark - UIGestureRecognizerDelegate
-- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
-    if (gestureRecognizer == self.listPanGesture && self.isCellSwipingInProgress) {
-        return NO;
-    }
-    return YES;
-}
-
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-    if (gestureRecognizer == self.listPanGesture && self.isCellSwipingInProgress) {
-        return NO;
-    }
+//    if (gestureRecognizer == self.listPanGesture && self.isCellSwipingInProgress) {
+//        return NO;
+//    }
     return YES;
 }
 
