@@ -8,11 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
+@class ItemTextField;
+
 @protocol ItemTextFieldDelegate <UITextFieldDelegate>
-- (void)didDeleteBackward;
+- (void)didDeleteBackward:(ItemTextField *)textField;
 @end
 
 @interface ItemTextField : UITextField
-@property (nonatomic, weak)id <ItemTextFieldDelegate> delegate;
+@property (nonatomic, weak) id<ItemTextFieldDelegate> delegate;
 
 @end

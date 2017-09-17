@@ -98,7 +98,6 @@
     [self.textField setKeyboardAppearance:UIKeyboardAppearanceDark];
     [self.textField setAdjustsFontSizeToFitWidth:YES];
     [self.textField setReturnKeyType:UIReturnKeyNext];
-    //    [self.textField setEnablesReturnKeyAutomatically:YES];
     
     //DOUBLE TAP GESTURE
     UITapGestureRecognizer *doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureCallback)];
@@ -195,6 +194,11 @@
     }
 }
 
+#pragma mark - Tap Interaction
+- (void)singleTapGestureCallback {
+    [self setSelected:YES];
+}
+
 #pragma mark - Double Tap Interaction
 - (void)doubleTapGestureCallback {
     if (self.listItem.isDone) {
@@ -209,6 +213,7 @@
 - (void)prepareForReuse {
     [super prepareForReuse];
     self.textField.text = @"";
+    [self.textField setUserInteractionEnabled:NO];
     [self.containerView setTransform:CGAffineTransformIdentity];
     [self.containerView setAlpha:1.0f];
     [self setShouldStandOut:NO];
@@ -227,21 +232,18 @@
 
 #pragma mark - UITextFieldDelegate, ItemTextFieldDelegate
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    if (textField.text.length > 0) {
-        if ([self.delegate respondsToSelector:@selector(didTapNextOnCellIndex:)]) {
-            [self.delegate didTapNextOnCellIndex:self.cellIndex];
-            return YES;
-        }else {
-            [textField resignFirstResponder];
-            return YES;
-        }
+    if ([self.delegate respondsToSelector:@selector(didTapNextOnCellIndex:)]) {
+        [self.delegate didTapNextOnCellIndex:self.cellIndex];
+        return YES;
     }
     return NO;
 }
 
-- (void)didDeleteBackward {
-    if ([self.delegate respondsToSelector:@selector(didBackspaceEmptyCell:)]) {
-        [self.delegate didBackspaceEmptyCell:self.cellIndex];
+- (void)didDeleteBackward:(ItemTextField *)textField {
+    if(textField.text.length == 0) {
+        if ([self.delegate respondsToSelector:@selector(didBackspaceEmptyCell:)]) {
+            [self.delegate didBackspaceEmptyCell:self.cellIndex];
+        }
     }
 }
 
