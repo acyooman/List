@@ -57,6 +57,7 @@
 
 - (void)createViews {
     //Buttons
+    
     //restore button
     self.restoreButton = [self getListButtonWithX:0.0f text:@"Restore"];
     [self.restoreButton addTarget:self action:@selector(didTapRestoreButton) forControlEvents:UIControlEventTouchUpInside];
@@ -396,6 +397,8 @@
 - (void)checkForPrefixAnimated:(BOOL)animated {
     if ([self.textField.text hasPrefix:@"#"]) {
         [self.bookmarkBGView setHidden:NO];
+    }else {
+        [self.bookmarkBGView setHidden:YES];
     }
 }
 
@@ -416,6 +419,5 @@
 - (void)textFieldDidEndEditing:(UITextField *)textField{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
-
 
 @end

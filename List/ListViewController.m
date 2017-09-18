@@ -11,6 +11,15 @@
 #import "ListTableViewCell.h"
 #import "ListItem.h"
 
+typedef NS_ENUM(NSInteger, PastSectionType) {
+    PastSectionTypeToday,
+    PastSectionTypeYesterday,
+    PastSectionTypeEarlierThisWeek,
+    PastSectionTypeEarlierThisMonth,
+    PastSectionTypeSomeMonth,
+    PastSectionTypeSomeYear
+};
+
 @interface ListViewController ()<UITableViewDataSource , UITableViewDelegate, ListTableViewCellDelegate, UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) NSMutableArray *itemsArray;
@@ -224,7 +233,8 @@
     }else {
         NSArray *startArray = @[[ListItem itemWithText:@"Swipe 👉 or 👈 to send this to past"],
                                 [ListItem itemWithText:@"Pull down this list to see past stuff ⏬"],
-                                [ListItem itemWithText:@"Double tap to highlight 👆👆"],
+                                [ListItem itemWithText:@"Double tap to highlight anything 👆👆"],
+                                [ListItem itemWithText:@"# 👈 Prefix stuff with #"],
                                 [ListItem itemWithText:@"Be awesome now 😘"]
                                 ];
         self.itemsArray = [[NSMutableArray alloc]initWithArray:startArray];
@@ -234,17 +244,69 @@
     self.scrollPosn = [[NSUserDefaults standardUserDefaults] floatForKey:@"listScrollValue"];
     
     //reload tables
-    [self.pastTableView reloadData];
-    [self.listTableView reloadData];
+    [self refreshViews];
 }
 
 #pragma mark - UITableViewDataSource
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+    if (tableView == self.listTableView) {
+        return 1;
+    }else {
+        return 2;
+    }
+    return 0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.itemsArray.count; //same in both
+    if (tableView == self.listTableView) {
+        return self.itemsArray.count;
+    }else {
+        if (section == 0) {
+            NSArray *array = [self getDoneItemsForSection:PastSectionTypeToday];
+            return array.count;
+        }else if(section == 1){
+            NSArray *array = [self getDoneItemsForSection:PastSectionTypeYesterday];
+            return array.count;
+        }
+    }
+    return 0;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    if (tableView == self.pastTableView) {
+        return 48+20;
+    }
+    return 0;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    if (tableView == self.pastTableView) {
+        
+        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [CommonFunctions getPhoneWidth], 48+40)];
+        [view setBackgroundColor:UIColorFromRGBWithAlpha(ColorLessDarkBG, 0.98f)];
+        
+        UIView *bgView = [[UIView alloc] initWithFrame:CGRectMake(-10.0f, 8.0f+20, 100.0, 32.0f)];
+        [bgView setBackgroundColor:UIColorFromRGB(ColorWhite)];
+        [bgView.layer setCornerRadius:5.0f];
+        [bgView.layer setMasksToBounds:YES];
+        [view addSubview:bgView];
+        
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(24, 8+20, 100.0f, 32.0f)];
+        [label setTextAlignment:NSTextAlignmentLeft];
+        [label setTextColor:UIColorFromRGB(ColorLessDarkBG)];
+        [label setFont:FontSemibold(18)];
+        [view addSubview:label];
+        
+        if (section == 0) {
+            [label setText:@"Today"];
+        }else {
+            [bgView setFrameWidth:140.0f];
+            [label setText:@"Yesterday"];
+        }
+        
+        return view;
+    }
+    return nil;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -272,15 +334,36 @@
             cell = [[ListTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"pastItemCell"];
             [cell setSeparatorInset:UIEdgeInsetsMake(0, 24, 0, 24)];
         }
-        ListItem *item = [self.itemsArray objectAtIndex:indexPath.row];
-        if (item.isDone) {
+        
+        if (indexPath.section == 0) {
+            NSArray *todayArray = [self getDoneItemsForSection:PastSectionTypeToday];
+            ListItem *item = [todayArray objectAtIndex:indexPath.row];
             [cell setListItem:item];
             [cell setCellIndex:indexPath.row];
-            [cell setDelegate:self];
+            //            [cell setDelegate:self];
             [cell setHidden:NO];
-        }else {
-            [cell setHidden:YES];
+            
+            return cell;
+        }else if(indexPath.section == 1){
+            NSArray *yesterdayArray = [self getDoneItemsForSection:PastSectionTypeYesterday];
+            ListItem *item = [yesterdayArray objectAtIndex:indexPath.row];
+            [cell setListItem:item];
+            [cell setCellIndex:indexPath.row];
+            //            [cell setDelegate:self];
+            [cell setHidden:NO];
+            return cell;
         }
+        
+        //        ListItem *item = [self.itemsArray objectAtIndex:indexPath.row];
+        //        if (item.isDone) {
+        //            [cell setListItem:item];
+        //            [cell setCellIndex:indexPath.row];
+        //            [cell setDelegate:self];
+        //            [cell setHidden:NO];
+        //        }else {
+        //            [cell setHidden:YES];
+        //        }
+        
         return cell;
     }
     
@@ -288,17 +371,13 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-    ListItem *item = [self.itemsArray objectAtIndex:indexPath.row];
-    
     if (tableView == self.listTableView) {
+        ListItem *item = [self.itemsArray objectAtIndex:indexPath.row];
         if (item.isDone) {
             return 0.0;
         }
         return 60;
     }else {
-        if (!item.isDone) {
-            return 0.0;
-        }
         return 60;
     }
     
@@ -315,6 +394,11 @@
 }
 
 #pragma mark - Helpers
+- (void)refreshViews {
+    [self.listTableView reloadData];
+    [self.pastTableView reloadData];
+}
+
 - (void)dismissKeyboard {
     [self.view endEditing:YES];
     NSArray *indexPaths = self.listTableView.indexPathsForSelectedRows;
@@ -328,8 +412,7 @@
     item.isDone = NO;
     item.dateOfMarkingDone = [NSDate date];
     [self.itemsArray replaceObjectAtIndex:index withObject:item];
-    [self.listTableView reloadData];
-    [self.pastTableView reloadData];
+    [self refreshViews];
     [self saveListDataToDisk];
 }
 
@@ -341,8 +424,7 @@
         item.isDone = YES;
         item.dateOfMarkingDone = [NSDate date];
         [self.itemsArray replaceObjectAtIndex:index withObject:item];
-        [self.listTableView reloadData];
-        [self.pastTableView reloadData];
+        [self refreshViews];
         [self saveListDataToDisk];
     }else {
         //just delete the blank items when swiped away
@@ -453,9 +535,7 @@
 
 - (void)removeListItemAtIndex:(NSInteger)index shouldMoveUp:(BOOL)shouldMoveUp{
     [self.itemsArray removeObjectAtIndex:index];
-    [self.listTableView reloadData];
-    [self.pastTableView reloadData];
-    
+    [self refreshViews];
     [self saveListDataToDisk];
     
     if (index > 0 && shouldMoveUp) {
@@ -466,9 +546,7 @@
 - (void)addNewItemAtIndex:(NSInteger)index {
     ListItem *newListItem = [ListItem itemWithText:@""];
     [self.itemsArray insertObject:newListItem atIndex:index];
-    [self.listTableView reloadData];
-    [self.pastTableView reloadData];
-    
+    [self refreshViews];
     [self saveListDataToDisk];
     [self.listTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0] animated:YES scrollPosition:UITableViewScrollPositionMiddle];
 }
@@ -478,11 +556,11 @@
         ListItem *lastListItem = [self.itemsArray lastObject];
         if (lastListItem.text.length != 0) {
             [self.itemsArray addObject:[ListItem itemWithText:@""]];
-            [self.listTableView reloadData];
+            [self refreshViews];
         }
     }else {
         [self.itemsArray addObject:[ListItem itemWithText:@""]];
-        [self.listTableView reloadData];
+        [self refreshViews];
     }
     
     [self saveListDataToDisk];
@@ -619,4 +697,49 @@
     self.isKeyboardShowingCurrently = NO;
 }
 
+#pragma mark - Done Data helpers
+- (NSArray *)getDoneItemsForSection:(PastSectionType)sectionType {
+    NSMutableArray *array = [[NSMutableArray alloc] init];
+    
+    switch (sectionType) {
+        case PastSectionTypeToday: {
+            for (ListItem *item in self.itemsArray) {
+                if (item.isDone) {
+                    NSDate *date = item.dateOfMarkingDone;
+                    if (date) {
+                        if ([[NSCalendar currentCalendar] isDateInToday:date]) {
+                            [array addObject:item];
+                        }
+                    }
+                }
+            }
+            return array;
+        }
+            break;
+            
+        case PastSectionTypeYesterday: {
+            for (ListItem *item in self.itemsArray) {
+                if (item.isDone) {
+                    NSDate *date = item.dateOfMarkingDone;
+                    if (date) {
+                        if ([[NSCalendar currentCalendar] isDateInYesterday:date]) {
+                            [array addObject:item];
+                        }
+                    }
+                }
+            }
+            return array;
+        }
+            break;
+            
+        case PastSectionTypeEarlierThisWeek: {
+            
+        }
+            break;
+            
+        default:
+            break;
+    }
+    return array;
+}
 @end
