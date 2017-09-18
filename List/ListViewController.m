@@ -103,7 +103,7 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     [self.view addSubview:self.statusBarBGToolbar];
     
     UIView *bottomLine = [[UIView alloc] initWithFrame:CGRectMake(0, 20.0f, [CommonFunctions getPhoneWidth], 0.5f)];
-    [bottomLine setBackgroundColor:UIColorFromRGB(ColorSeparator)];
+    [bottomLine setBackgroundColor:UIColorFromRGBWithAlpha(ColorSeparator, 0.2)];
     [self.statusBarBGToolbar addSubview:bottomLine];
 }
 
@@ -286,7 +286,7 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
         [view setBackgroundColor:UIColorFromRGBWithAlpha(ColorLessDarkBG, 0.98f)];
         
         UIView *bgView = [[UIView alloc] initWithFrame:CGRectMake(-10.0f, 8.0f+20, 100.0, 32.0f)];
-        [bgView setBackgroundColor:UIColorFromRGB(ColorWhite)];
+        [bgView setBackgroundColor:UIColorFromRGBWithAlpha(ColorWhite, 0.95)];
         [bgView.layer setCornerRadius:5.0f];
         [bgView.layer setMasksToBounds:YES];
         [view addSubview:bgView];

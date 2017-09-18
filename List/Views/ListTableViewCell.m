@@ -383,6 +383,7 @@
         [self.restoreButton setAlpha:1.0f];
         [self.deleteButton setAlpha:1.0f];
         [self.bookmarkBGView setHidden:YES];
+        [self setUserInteractionEnabled:NO]; //TODO:CELL REMOVE STUFF
     }else {
         [self setShouldStandOut:self.listItem.isHighlighted doubleTapped:NO];
         [self.textField setEnabled:YES];
@@ -391,6 +392,7 @@
         [self.restoreButton setAlpha:0.0f];
         [self.deleteButton setAlpha:0.0f];
         [self checkForPrefixAnimated:NO];
+        [self setUserInteractionEnabled:YES]; //TODO:CELL REMOVE STUFF
     }
 }
 
