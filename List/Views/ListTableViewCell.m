@@ -11,7 +11,6 @@
 #import "CommonFunctions.h"
 
 @interface ListTableViewCell () <UITextFieldDelegate, UIGestureRecognizerDelegate, ItemTextFieldDelegate>
-@property (nonatomic, strong) UIView *bottomSeparator;
 
 @property (nonatomic, strong) ItemTextField *textField;
 @property (nonatomic, strong) UIView *containerView;
@@ -23,7 +22,7 @@
 @property (nonatomic) BOOL shouldEndPanGesture;
 
 @property (nonatomic, strong) ListItem *listItem;
-@property (nonatomic)BOOL shouldStandOut;
+@property (nonatomic)BOOL isStandingOut;
 
 @property (nonatomic, strong) UIButton *deleteButton;
 @property (nonatomic, strong) UIButton *restoreButton;
@@ -31,6 +30,8 @@
 @property (nonatomic, strong) UITapGestureRecognizer *doubleTapGesture;
 
 @property (nonatomic) NSInteger backspaceCount;
+
+@property (nonatomic, strong) UIView *bookmarkBGView;
 
 @end
 
@@ -42,8 +43,6 @@
     if (self) {
         [self setDefaults];
         [self createViews];
-        [self setShouldStandOut:NO];
-        //        [self subscribeToNotifications];
     }
     
     return self;
@@ -51,7 +50,7 @@
 
 - (void)setDefaults {
     [self setSelectionStyle:UITableViewCellSelectionStyleNone];
-    [self setSelected:NO];
+    [self setShouldStandOut:NO doubleTapped:NO];
     [self setBackgroundColor:[UIColor clearColor]];
     self.backspaceCount = 0;
 }
@@ -77,19 +76,20 @@
     [self.highlightingLayer setFrame:self.bounds];
     [self.highlightingLayer setStartPoint:CGPointMake(0.0, 0.5)];
     [self.highlightingLayer setEndPoint:CGPointMake(1.0, 0.5)];
+    [self.highlightingLayer setHidden:YES];
     [self.highlightingLayer setColors:[self getGradientColorsArray]];
     [self.containerView.layer insertSublayer:self.highlightingLayer atIndex:0];
-    
-    //bottom separator
-    //    self.bottomSeparator = [[UIView alloc] initWithFrame:CGRectMake(24, self.bounds.size.height-0.5, [CommonFunctions getPhoneWidth]-24*2, 0.5f)];
-    //    [self.bottomSeparator setBackgroundColor:UIColorFromRGB(ColorSeparator)];
-    
     
     //pan gesture for swipe
     self.panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureCallback:)];
     [self.containerView addGestureRecognizer:self.panGesture];
     [self.panGesture setDelegate:self];
     [self.panGesture setEnabled:YES];
+    
+    //bookmark background
+    self.bookmarkBGView = [self getBookmarkBgView];
+    [self.bookmarkBGView setHidden:YES];
+    [self.containerView addSubview:self.bookmarkBGView];
     
     //text field
     self.textField = [[ItemTextField alloc] initWithFrame:CGRectMake(24, 20, [CommonFunctions getPhoneWidth]-40, 24)];
@@ -100,7 +100,7 @@
     [self.textField setFont:FontSemibold(18)];
     [self.textField setTintColor:[UIColor whiteColor]];
     [self.textField setTextColor:UIColorFromRGB(0xFAFAFA)];
-    [self.textField setClearButtonMode:UITextFieldViewModeWhileEditing];
+    [self.textField setClearButtonMode:UITextFieldViewModeNever];
     
     //text field - keyboard
     [self.textField setKeyboardType:UIKeyboardTypeDefault];
@@ -112,6 +112,18 @@
     self.doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureCallback)];
     [self.doubleTapGesture setNumberOfTapsRequired:2];
     [self.containerView addGestureRecognizer:self.doubleTapGesture];
+}
+
+- (UIView *)getBookmarkBgView {
+    UIView *bookmarkBgView = [[UIView alloc] initWithFrame:CGRectMake(-10, 0, [CommonFunctions getPhoneWidth]*2/3, 42.0f)];
+    [bookmarkBgView.layer setCornerRadius:5.0f];
+    [bookmarkBgView.layer setMasksToBounds:YES];
+    
+    CAGradientLayer *gradientlayer = [CAGradientLayer layer];
+    [gradientlayer setFrame:bookmarkBgView.bounds];
+    [gradientlayer setColors:[self getBookmarkGradientColorsArray]];
+    [bookmarkBgView.layer insertSublayer:gradientlayer atIndex:0];
+    return bookmarkBgView;
 }
 
 - (UIButton *)getListButtonWithX:(CGFloat)x text:(NSString *)text {
@@ -132,15 +144,17 @@
     
     [self.containerView setFrame:self.bounds];
     [self.highlightingLayer setFrame:self.bounds];
+    [self.bookmarkBGView setCenterY:self.bounds.size.height/2];
     [self.containerView setTransform:CGAffineTransformIdentity];
     [self.textField setFrame:CGRectMake(24, 20, [CommonFunctions getPhoneWidth]-40, 24)];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
     [super setSelected:selected animated:animated];
+    
     if (selected) {
         [self.textField becomeFirstResponder];
-    }else{
+    } else {
         [self.textField resignFirstResponder];
     }
 }
@@ -206,8 +220,8 @@
                 }else {
                     [self swipeOffToLeft];
                 }
-            }else if (fabs(velocityInView.y) > 200.f) {
-                if (velocityInView.y > 0) {
+            }else if (fabs(velocityInView.x) > 1000.f) {
+                if (velocityInView.x < 0) {
                     [self swipeOffToLeft];
                 }else {
                     [self swipeOffToRight];
@@ -232,7 +246,7 @@
 }
 
 - (void)swipeOffToRight {
-    [UIView animateWithDuration:0.3 animations:^{
+    [UIView animateWithDuration:0.25 delay:0.0f options:UIViewAnimationOptionCurveEaseIn animations:^{
         //        [self.containerView setAlpha:0.0f];
         [self.containerView setTransform:CGAffineTransformMakeTranslation([CommonFunctions getPhoneWidth],0.0f)];
     }completion:^(BOOL finished) {
@@ -244,14 +258,15 @@
 }
 
 - (void)swipeOffToLeft {
-    [UIView animateWithDuration:0.5 animations:^{
-        //        [self.containerView setAlpha:0.0f];
-        [self.containerView setTransform:CGAffineTransformMakeTranslation(-[CommonFunctions getPhoneWidth],0.0f)];
-    }completion:^(BOOL finished) {
-        if (!self.listItem.isDone) {
-            [self swipeOffCompleted];
-        }
-    }];
+    [UIView animateWithDuration:0.25 delay:0.0f options:UIViewAnimationOptionCurveEaseIn
+                     animations:^{
+                         //        [self.containerView setAlpha:0.0f];
+                         [self.containerView setTransform:CGAffineTransformMakeTranslation(-[CommonFunctions getPhoneWidth],0.0f)];
+                     }completion:^(BOOL finished) {
+                         if (!self.listItem.isDone) {
+                             [self swipeOffCompleted];
+                         }
+                     }];
 }
 
 - (void)swipeOffCompleted {
@@ -266,31 +281,32 @@
     }
 }
 
-#pragma mark - Tap Interaction
-- (void)singleTapGestureCallback {
-    [self setSelected:YES];
-}
-
 #pragma mark - Double Tap Interaction
 - (void)doubleTapGestureCallback {
     if (self.listItem.isDone) {
         return;
     }
-    
-    [self setSelected:NO animated:NO];
-    [self setShouldStandOut:!self.shouldStandOut];
+    self.isStandingOut = !self.isStandingOut;
+    [self setShouldStandOut:self.isStandingOut doubleTapped:YES];
 }
 
 #pragma mark - Reuse
 - (void)prepareForReuse {
     [super prepareForReuse];
     self.backspaceCount = 0;
+    [self setShouldStandOut:NO doubleTapped:NO];
     self.textField.text = @"";
+    [self.bookmarkBGView setHidden:YES];
     [self.containerView setTransform:CGAffineTransformIdentity];
     [self.containerView setAlpha:1.0f];
+    //    [self setSelected:NO animated:NO];
 }
 
 #pragma mark - Helpers
+- (NSArray *)getBookmarkGradientColorsArray {
+    return [NSArray arrayWithObjects:(id)[UIColorFromRGB(0x69A7EE) CGColor], (id)[UIColorFromRGB(0x4990E2) CGColor], nil];
+}
+
 - (NSArray *)getGradientColorsArray {
     //    return [NSArray arrayWithObjects:(id)[UIColorFromRGB(0x52CB8C) CGColor], (id)[UIColorFromRGB(0x48BA5A) CGColor], nil];
     //    4198FF 5E69FF BLUE PURPLE
@@ -307,7 +323,7 @@
         [self.delegate didTapNextOnCellIndex:self.cellIndex];
         return YES;
     }
-    return NO;
+    return YES;
 }
 
 - (void)didDeleteBackward:(ItemTextField *)textField {
@@ -325,48 +341,68 @@
 
 
 #pragma mark - Setters
-
-- (void)setShouldStandOut:(BOOL)shouldStandOut {
-    _shouldStandOut = shouldStandOut;
+- (void)setShouldStandOut:(BOOL)shouldStandOut doubleTapped:(BOOL)isDoubleTapped {
+    self.isStandingOut = shouldStandOut;
     
-    [UIView animateWithDuration:0.2f animations:^{
-        [self.highlightingLayer setOpacity:shouldStandOut?1.0f:0.0f];
+    if (isDoubleTapped) {
+        [self.highlightingLayer setOpacity:!shouldStandOut?1.0f:0.0f];
+        [self.highlightingLayer setHidden:NO];
+        [UIView animateWithDuration:0.4f animations:^{
+            [self.highlightingLayer setOpacity:shouldStandOut?1.0f:0.0f];
+            [self.textField setAlpha:shouldStandOut?1.0f:0.9f];
+        } completion:^(BOOL finished) {
+            if(!shouldStandOut) {
+                [self.highlightingLayer setHidden:YES];
+            }
+            
+            [self.highlightingLayer setOpacity:1.0f];
+            
+            if([self.delegate respondsToSelector:@selector(didToggleStandOutStateAtIndex:isStandingOut:)]){
+                [self.delegate didToggleStandOutStateAtIndex:self.cellIndex isStandingOut:shouldStandOut];
+            }
+        }];
+    }else {
+        [self.highlightingLayer setHidden:!shouldStandOut];
         [self.textField setAlpha:shouldStandOut?1.0f:0.9f];
-    }completion:^(BOOL finished) {
-        if([self.delegate respondsToSelector:@selector(didToggleStandOutStateAtIndex:isStandingOut:)]){
-            [self.delegate didToggleStandOutStateAtIndex:self.cellIndex isStandingOut:shouldStandOut];
-        }
-    }];
+    }
 }
 
 - (void)setListItem:(ListItem *)listItem {
     _listItem = listItem;
     [self.textField setText:listItem.text];
-    
     [self setCellDoneStuff:listItem.isDone];
 }
 
 - (void)setCellDoneStuff:(BOOL)isDone {
     if (isDone) {
-        [self setShouldStandOut:NO];
+        [self setShouldStandOut:NO doubleTapped:NO];
         [self.containerView setBackgroundColor:UIColorFromRGB(ColorLessDarkBG)];
         [self.contentView setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
         [self.textField setEnabled:NO];
         [self.restoreButton setAlpha:1.0f];
         [self.deleteButton setAlpha:1.0f];
-        //        [self setUserInteractionEnabled:NO];
+        [self.bookmarkBGView setHidden:YES];
     }else {
-        [self setShouldStandOut:self.listItem.isHighlighted];
+        [self setShouldStandOut:self.listItem.isHighlighted doubleTapped:NO];
         [self.textField setEnabled:YES];
         [self.containerView setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
         [self.contentView setBackgroundColor:UIColorFromRGB(ColorLessDarkBG)];
         [self.restoreButton setAlpha:0.0f];
         [self.deleteButton setAlpha:0.0f];
+        [self checkForPrefixAnimated:NO];
+    }
+}
+
+- (void)checkForPrefixAnimated:(BOOL)animated {
+    if ([self.textField.text hasPrefix:@"#"]) {
+        [self.bookmarkBGView setHidden:NO];
     }
 }
 
 #pragma mark - Notification
 - (void)textDidUpdateCallback {
+    [self checkForPrefixAnimated:YES];
+    
     if ([self.delegate respondsToSelector:@selector(didUpdateWithText:cellIndex:)]) {
         [self.delegate didUpdateWithText:self.textField.text cellIndex:self.cellIndex];
     }
