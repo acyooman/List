@@ -116,7 +116,7 @@
 }
 
 - (UIView *)getBookmarkBgView {
-    UIView *bookmarkBgView = [[UIView alloc] initWithFrame:CGRectMake(-10, 0, [CommonFunctions getPhoneWidth]*2/3, 42.0f)];
+    UIView *bookmarkBgView = [[UIView alloc] initWithFrame:CGRectMake(-10, 0, [CommonFunctions getPhoneWidth]*3/5, 42.0f)];
     [bookmarkBgView.layer setCornerRadius:5.0f];
     [bookmarkBgView.layer setMasksToBounds:YES];
     

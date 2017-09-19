@@ -283,10 +283,12 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     if (tableView == self.pastTableView) {
         
         UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [CommonFunctions getPhoneWidth], 48+40)];
-        [view setBackgroundColor:UIColorFromRGBWithAlpha(ColorLessDarkBG, 0.98f)];
         
-        UIView *bgView = [[UIView alloc] initWithFrame:CGRectMake(-10.0f, 8.0f+20, 100.0, 32.0f)];
-        [bgView setBackgroundColor:UIColorFromRGBWithAlpha(ColorWhite, 0.95)];
+        //        [view setBackgroundColor:UIColorFromRGBWithAlpha(ColorLessDarkBG, 0.98f)];
+        
+        UIView *bgView = [[UIView alloc] initWithFrame:CGRectMake(-10.0f, 8.0f+20, 120.0, 32.0f)];
+        UIView *bgViewShadowView = [[UIView alloc] initWithFrame:bgView.bounds];
+        [bgView setBackgroundColor:UIColorFromRGBWithAlpha(ColorWhite, 0.92)];
         [bgView.layer setCornerRadius:5.0f];
         [bgView.layer setMasksToBounds:YES];
         [view addSubview:bgView];
@@ -297,13 +299,32 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
         [label setFont:FontSemibold(18)];
         [view addSubview:label];
         
+        UILabel *countLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 20.0f, 20.0f)];
+        [countLabel setBackgroundColor:UIColorFromRGBWithAlpha(ColorLessDarkBG, 1.0f)];
+        [countLabel setTextColor:UIColorFromRGBWithAlpha(ColorWhite, 0.95)];
+        [countLabel setFont:FontSemibold(11)];
+        [countLabel.layer setCornerRadius:10.0f];
+        [countLabel setTextAlignment:NSTextAlignmentCenter];
+        [countLabel.layer setMasksToBounds:YES];
+        [bgView addSubview:countLabel];
+        
         if (section == 0) {
             [label setText:@"Today"];
+            NSArray *todayArray = [self getDoneItemsForSection:PastSectionTypeToday];
+            [countLabel setText:[NSString stringWithFormat:@"%@", @(todayArray.count)]];
         }else {
-            [bgView setFrameWidth:140.0f];
+            [bgView setFrameWidth:150.0f];
+            [bgViewShadowView setFrameWidth:150.0f];
+            
+            NSArray *yesterdayArray = [self getDoneItemsForSection:PastSectionTypeYesterday];
+            [countLabel setText:[NSString stringWithFormat:@"%@", @(yesterdayArray.count)]];
+            
             [label setText:@"Yesterday"];
         }
         
+        [countLabel setCenterY:bgView.bounds.size.height/2];
+        [countLabel setFrameX:bgView.frame.size.width - countLabel.frame.size.width - 8.0f];
+
         return view;
     }
     return nil;
@@ -455,6 +476,29 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     
 }
 
+
+- (void)copyListToPasteboardWithDone:(BOOL)doneFlag{
+    NSMutableString *string = [[NSMutableString alloc] init];
+    
+    for (ListItem *item in self.itemsArray) {
+        if (item.isDone == doneFlag) {
+            [string appendString:item.text];
+            [string appendString:@"\n"];
+        }
+    }
+    
+    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+    pasteboard.string = string;
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:doneFlag?@"Done items copied" :@"List items copied" message:string preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Awesome" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alertController dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    
+    [self presentViewController:alertController animated:YES completion:nil];
+    
+}
+
 - (UIView *)getListFooterView {
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [CommonFunctions getPhoneWidth], 400.0)];
     [view setUserInteractionEnabled:YES];
@@ -476,8 +520,16 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     
     [view setUserInteractionEnabled:YES];
     
+    //tap gesture
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyListItems)];
+    [view addGestureRecognizer:tapGesture];
+    
     [view addSubview:headingLabel];
     return view;
+}
+
+- (void)copyListItems {
+    [self copyListToPasteboardWithDone:NO];
 }
 
 - (UIView *)getPastHeaderView {
@@ -490,8 +542,17 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     
     [view setUserInteractionEnabled:YES];
     
+    //tap gesture
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyPastItems)];
+    [view addGestureRecognizer:tapGesture];
+    
+    
     [view addSubview:headingLabel];
     return view;
+}
+
+- (void)copyPastItems {
+    [self copyListToPasteboardWithDone:YES];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -698,6 +759,16 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
 }
 
 #pragma mark - Done Data helpers
+- (NSArray *)getDateSortedArray:(NSArray *)array ascending:(BOOL)ascending{
+    NSSortDescriptor *dateDescriptor = [NSSortDescriptor
+                                        sortDescriptorWithKey:@"dateOfMarkingDone"
+                                        ascending:ascending];
+    NSArray *sortDescriptors = [NSArray arrayWithObject:dateDescriptor];
+    NSArray *sortedArray = [array
+                                 sortedArrayUsingDescriptors:sortDescriptors];
+    return sortedArray;
+}
+
 - (NSArray *)getDoneItemsForSection:(PastSectionType)sectionType {
     NSMutableArray *array = [[NSMutableArray alloc] init];
     
@@ -713,7 +784,8 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
                     }
                 }
             }
-            return array;
+            NSArray *sortedArray = [self getDateSortedArray:array ascending:NO];
+            return sortedArray;
         }
             break;
             
@@ -728,7 +800,8 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
                     }
                 }
             }
-            return array;
+            NSArray *sortedArray = [self getDateSortedArray:array ascending:NO];
+            return sortedArray;
         }
             break;
             
