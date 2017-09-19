@@ -40,6 +40,8 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
 @property (nonatomic) BOOL shouldEndPanGesture;
 
 @property (nonatomic) BOOL isKeyboardShowingCurrently;
+
+@property (nonatomic, strong) UIView *headingScrollerView;
 //@property (nonatomic) BOOL isCellSwipingInProgress;
 
 @property (nonatomic, strong) UIToolbar *statusBarBGToolbar;
@@ -117,6 +119,7 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     //table view
     self.pastTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, [CommonFunctions getPhoneWidth], [CommonFunctions getPhoneHeight]) style:UITableViewStylePlain];
     [self.pastTableView setTableHeaderView:[self getPastHeaderView]];
+    [self.pastTableView setScrollIndicatorInsets:UIEdgeInsetsMake(20, 0, 0, 0)];
     [self.pastContainerView addSubview:self.pastTableView];
     
     //customize
@@ -131,9 +134,9 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     [self.pastTableView setSeparatorColor:UIColorFromRGB(ColorSeparator)];
     
     //patch view
-    UIView *patchView = [[UIView alloc] initWithFrame:CGRectMake(0, [CommonFunctions getPhoneHeight] - 40.0f, [CommonFunctions getPhoneWidth], 40.0f)];
-    [self.pastContainerView addSubview:patchView];
-    [patchView setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
+    //    UIView *patchView = [[UIView alloc] initWithFrame:CGRectMake(0, [CommonFunctions getPhoneHeight] - 40.0f, [CommonFunctions getPhoneWidth], 40.0f)];
+    //    [self.pastContainerView addSubview:patchView];
+    //    [patchView setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
 }
 
 - (void)createListViews {
@@ -141,12 +144,18 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     self.listContainerView = [[UIView alloc] init];
     [self.listContainerView setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
     [self.listContainerView setFrame:CGRectMake(0, 0, [CommonFunctions getPhoneWidth], [CommonFunctions getPhoneHeight])];
+    
+    [self.listContainerView.layer setShadowColor:UIColorFromRGB(ColorJetBlack).CGColor];
+    [self.listContainerView.layer setShadowOffset:CGSizeMake(0, -4)];
+    [self.listContainerView.layer setShadowRadius:5.0f];
+    [self.listContainerView.layer setShadowOpacity:0.3f];
     [self.view addSubview:self.listContainerView];
     
     //table view
     self.listTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, [CommonFunctions getPhoneWidth], [CommonFunctions getPhoneHeight]) style:UITableViewStylePlain];
     [self.listTableView setTableHeaderView:[self getListHeaderView]];
     [self.listContainerView addSubview:self.listTableView];
+    [self.listTableView setScrollIndicatorInsets:UIEdgeInsetsMake(20, 0, 0, 0)];
     
     //customize
     [self.listTableView setAllowsMultipleSelectionDuringEditing:NO];
@@ -335,7 +344,6 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
         ListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"itemCell"];
         if (!cell) {
             cell = [[ListTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"itemCell"];
-            [cell setSeparatorInset:UIEdgeInsetsMake(0, 24, 0, 24)];
         }
         ListItem *item = [self.itemsArray objectAtIndex:indexPath.row];
         if (!item.isDone) {
@@ -343,9 +351,28 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
             [cell setCellIndex:indexPath.row];
             [cell setDelegate:self];
             [cell setHidden:NO];
+            
+            if ([item.text hasPrefix:@"#"]) {
+                [cell setSeparatorInset:UIEdgeInsetsMake(0, 0, 0, [CommonFunctions getPhoneWidth])];
+            }else {
+                [cell setSeparatorInset:UIEdgeInsetsMake(0, 24, 0, 24)];
+            }
+            
         }else {
             [cell setHidden:YES];
         }
+        
+        //check for separator
+        if (self.itemsArray.count >= indexPath.row+1) {
+            ListItem *item = [self.itemsArray objectAtIndex:indexPath.row];
+            if (!item.isDone) {
+                if ([item.text hasPrefix:@"#"]) {
+                    [cell setSeparatorInset:UIEdgeInsetsMake(0, 0, 0, [CommonFunctions getPhoneWidth])];
+                }
+            }
+            
+        }
+        
         return cell;
     }
     
@@ -521,15 +548,20 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     [view setUserInteractionEnabled:YES];
     
     //tap gesture
-    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyListItems)];
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(listHeaderTapGesture)];
     [view addGestureRecognizer:tapGesture];
     
     [view addSubview:headingLabel];
     return view;
 }
 
-- (void)copyListItems {
-    [self copyListToPasteboardWithDone:NO];
+- (void)listHeaderTapGesture {
+    if (self.listContainerView.frame.origin.y == 0) {
+        [self copyListToPasteboardWithDone:NO];
+    }else {
+        [self maximizeListContainer];
+    }
+    
 }
 
 - (UIView *)getPastHeaderView {
@@ -573,9 +605,10 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
 }
 
 - (void)minimizeListContainer {
-    [UIView animateWithDuration:0.3f delay:0.0f usingSpringWithDamping:0.85f initialSpringVelocity:0.3f options:UIViewAnimationOptionCurveEaseIn animations:^{
-        [self.listContainerView setFrameY:[CommonFunctions getPhoneHeight] - 100.0f];
+    [UIView animateWithDuration:0.9f delay:0.0f usingSpringWithDamping:0.95f initialSpringVelocity:0.3f options:UIViewAnimationOptionCurveEaseInOut|UIViewAnimationOptionAllowUserInteraction animations:^{
+        [self.listContainerView setFrameY:[CommonFunctions getPhoneHeight] - 114.0f];
         [self.statusBarBGToolbar setTintColor:UIColorFromRGB(ColorOrange)];
+        [self.pastContainerView setFrameY:0.0f];
     } completion:^(BOOL finished) {
         [self.listSwipeGesture setEnabled:YES];
         [self.listPanGesture setEnabled:NO];
@@ -584,10 +617,12 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
 
 - (void)maximizeListContainer {
     [self.listTableView setScrollEnabled:YES];
-    [UIView animateWithDuration:0.3f delay:0.0 usingSpringWithDamping:0.85f initialSpringVelocity:0.3f options:UIViewAnimationOptionCurveEaseInOut|UIViewAnimationOptionAllowUserInteraction animations:^{
+    [UIView animateWithDuration:0.9f delay:0.0 usingSpringWithDamping:0.95f initialSpringVelocity:0.3f options:UIViewAnimationOptionCurveEaseInOut|UIViewAnimationOptionAllowUserInteraction animations:^{
         [self.listContainerView setFrameY:0.0f];
         [self.view setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
         [self.statusBarBGToolbar setAlpha:1.0f];
+        
+        [self.pastContainerView setFrameY:-1*([CommonFunctions getPhoneHeight]-124*3)];
     } completion:^(BOOL finished) {
         [self.listPanGesture setEnabled:YES];
         [self.view setBackgroundColor:UIColorFromRGB(ColorLessDarkBG)];

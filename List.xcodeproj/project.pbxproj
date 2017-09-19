@@ -16,6 +16,7 @@
 		E843A56D1F6AE257000F53BC /* CommonFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = E843A56C1F6AE257000F53BC /* CommonFunctions.m */; };
 		E867D5E41F6E7DED004FB9D2 /* UIView+Shorthands.m in Sources */ = {isa = PBXBuildFile; fileRef = E867D5E21F6E7DED004FB9D2 /* UIView+Shorthands.m */; };
 		E867D5E71F6E9536004FB9D2 /* ItemTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = E867D5E61F6E9536004FB9D2 /* ItemTextField.m */; };
+		E86A73A31F7193C20055D7E0 /* AABookmarkView.m in Sources */ = {isa = PBXBuildFile; fileRef = E86A73A21F7193C10055D7E0 /* AABookmarkView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,8 @@
 		E867D5E31F6E7DED004FB9D2 /* UIView+Shorthands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIView+Shorthands.h"; sourceTree = "<group>"; };
 		E867D5E51F6E9536004FB9D2 /* ItemTextField.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ItemTextField.h; sourceTree = "<group>"; };
 		E867D5E61F6E9536004FB9D2 /* ItemTextField.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ItemTextField.m; sourceTree = "<group>"; };
+		E86A73A11F7193C10055D7E0 /* AABookmarkView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AABookmarkView.h; sourceTree = "<group>"; };
+		E86A73A21F7193C10055D7E0 /* AABookmarkView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AABookmarkView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +102,8 @@
 				E843A55B1F6AE06A000F53BC /* ListTableViewCell.m */,
 				E867D5E51F6E9536004FB9D2 /* ItemTextField.h */,
 				E867D5E61F6E9536004FB9D2 /* ItemTextField.m */,
+				E86A73A11F7193C10055D7E0 /* AABookmarkView.h */,
+				E86A73A21F7193C10055D7E0 /* AABookmarkView.m */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -185,6 +190,7 @@
 			files = (
 				E843A5471F6ADD64000F53BC /* ListViewController.m in Sources */,
 				E843A55C1F6AE06A000F53BC /* ListTableViewCell.m in Sources */,
+				E86A73A31F7193C20055D7E0 /* AABookmarkView.m in Sources */,
 				E867D5E71F6E9536004FB9D2 /* ItemTextField.m in Sources */,
 				E82AED501F6E31BD00F2AA9C /* ListItem.m in Sources */,
 				E867D5E41F6E7DED004FB9D2 /* UIView+Shorthands.m in Sources */,

@@ -9,12 +9,15 @@
 #import "ListTableViewCell.h"
 #import "ItemTextField.h"
 #import "CommonFunctions.h"
+#import "AABookmarkView.h"
 
 @interface ListTableViewCell () <UITextFieldDelegate, UIGestureRecognizerDelegate, ItemTextFieldDelegate>
 
 @property (nonatomic, strong) ItemTextField *textField;
 @property (nonatomic, strong) UIView *containerView;
 @property (nonatomic, strong) CAGradientLayer *highlightingLayer;
+
+@property (nonatomic, strong) CAGradientLayer *bgGradientLayer;
 @property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
 
 @property (nonatomic) CGFloat panGestureStartX;
@@ -31,7 +34,7 @@
 
 @property (nonatomic) NSInteger backspaceCount;
 
-@property (nonatomic, strong) UIView *bookmarkBGView;
+@property (nonatomic, strong) AABookmarkView *bookmarkBGView;
 
 @end
 
@@ -68,6 +71,15 @@
     [self.deleteButton addTarget:self action:@selector(didTapDeleteButton) forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:self.deleteButton];
     
+    //green gradient
+    self.bgGradientLayer = [CAGradientLayer layer];
+    [self.bgGradientLayer setFrame:self.bounds];
+    [self.bgGradientLayer setStartPoint:CGPointMake(0.0, 0.5)];
+    [self.bgGradientLayer setEndPoint:CGPointMake(1.0, 0.5)];
+    [self.bgGradientLayer setHidden:YES];
+    [self.bgGradientLayer setColors:[self getGradientForBackground]];
+    [self.contentView.layer insertSublayer:self.bgGradientLayer atIndex:0];
+    
     //container view
     self.containerView = [[UIView alloc] initWithFrame:self.bounds];
     [self.contentView addSubview:self.containerView];
@@ -78,7 +90,7 @@
     [self.highlightingLayer setStartPoint:CGPointMake(0.0, 0.5)];
     [self.highlightingLayer setEndPoint:CGPointMake(1.0, 0.5)];
     [self.highlightingLayer setHidden:YES];
-    [self.highlightingLayer setColors:[self getGradientColorsArray]];
+    [self.highlightingLayer setColors:[self getGradientForHighlight]];
     [self.containerView.layer insertSublayer:self.highlightingLayer atIndex:0];
     
     //pan gesture for swipe
@@ -88,7 +100,7 @@
     [self.panGesture setEnabled:YES];
     
     //bookmark background
-    self.bookmarkBGView = [self getBookmarkBgView];
+    self.bookmarkBGView = [[AABookmarkView alloc] init];
     [self.bookmarkBGView setHidden:YES];
     [self.containerView addSubview:self.bookmarkBGView];
     
@@ -113,18 +125,6 @@
     self.doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureCallback)];
     [self.doubleTapGesture setNumberOfTapsRequired:2];
     [self.containerView addGestureRecognizer:self.doubleTapGesture];
-}
-
-- (UIView *)getBookmarkBgView {
-    UIView *bookmarkBgView = [[UIView alloc] initWithFrame:CGRectMake(-10, 0, [CommonFunctions getPhoneWidth]*3/5, 42.0f)];
-    [bookmarkBgView.layer setCornerRadius:5.0f];
-    [bookmarkBgView.layer setMasksToBounds:YES];
-    
-    CAGradientLayer *gradientlayer = [CAGradientLayer layer];
-    [gradientlayer setFrame:bookmarkBgView.bounds];
-    [gradientlayer setColors:[self getBookmarkGradientColorsArray]];
-    [bookmarkBgView.layer insertSublayer:gradientlayer atIndex:0];
-    return bookmarkBgView;
 }
 
 - (UIButton *)getListButtonWithX:(CGFloat)x text:(NSString *)text {
@@ -300,19 +300,27 @@
     [self.bookmarkBGView setHidden:YES];
     [self.containerView setTransform:CGAffineTransformIdentity];
     [self.containerView setAlpha:1.0f];
-    //    [self setSelected:NO animated:NO];
+    
+    //if changed for bookmark
+    [self.textField setTintColor:[UIColor whiteColor]];
+    [self.textField setTextColor:UIColorFromRGB(0xFAFAFA)];
 }
 
 #pragma mark - Helpers
-- (NSArray *)getBookmarkGradientColorsArray {
+- (NSArray *)getGradientForBookmark {
+    //    /* Rectangle 5: */
+    //    background-image: linear-gradient(-90deg, #FFFFFF 0%, #EFEFEF 100%);
+    //    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.50);
+    //    border-radius: 4px 4px 5px 4px 4px;
+    //
+    return [NSArray arrayWithObjects:(id)[UIColorFromRGB(0xFFFFFF) CGColor], (id)[UIColorFromRGB(0xEFEFEF) CGColor], nil];
+}
+
+- (NSArray *)getGradientForBackground {
     return [NSArray arrayWithObjects:(id)[UIColorFromRGB(0x69A7EE) CGColor], (id)[UIColorFromRGB(0x4990E2) CGColor], nil];
 }
 
-- (NSArray *)getGradientColorsArray {
-    //    return [NSArray arrayWithObjects:(id)[UIColorFromRGB(0x52CB8C) CGColor], (id)[UIColorFromRGB(0x48BA5A) CGColor], nil];
-    //    4198FF 5E69FF BLUE PURPLE
-    //    return [NSArray arrayWithObjects:(id)[UIColorFromRGB(0x4198FF) CGColor], (id)[UIColorFromRGB(0x5E69FF) CGColor], nil];
-    
+- (NSArray *)getGradientForHighlight {
     UIColor *startColor = UIColorFromRGB(0x673BEC);
     UIColor *endColor = UIColorFromRGB(0xA63FF9);
     return [NSArray arrayWithObjects:(id)[startColor CGColor], (id)[endColor CGColor], nil];
@@ -391,22 +399,43 @@
         [self.contentView setBackgroundColor:UIColorFromRGB(ColorLessDarkBG)];
         [self.restoreButton setAlpha:0.0f];
         [self.deleteButton setAlpha:0.0f];
-        [self checkForPrefixAnimated:NO];
+        [self checkIfBookmark:NO];
         [self setUserInteractionEnabled:YES]; //TODO:CELL REMOVE STUFF
     }
 }
 
-- (void)checkForPrefixAnimated:(BOOL)animated {
+- (void)checkIfBookmark:(BOOL)animated {
     if ([self.textField.text hasPrefix:@"#"]) {
+        BOOL wasHidden = self.bookmarkBGView.hidden;
         [self.bookmarkBGView setHidden:NO];
+        [self.bookmarkBGView setText:self.textField.text];
+        
+        if (self.textField.text.length == 1 && animated && wasHidden) {
+            [self.bookmarkBGView setTransform:CGAffineTransformMakeTranslation(-80.0f, 0.0)];
+            [self.bookmarkBGView setAlpha:0.0];
+            [UIView animateWithDuration:0.4f delay:0.0f usingSpringWithDamping:0.8f initialSpringVelocity:0.3f options:UIViewAnimationOptionCurveEaseIn animations:^{
+                [self.bookmarkBGView setTransform:CGAffineTransformMakeTranslation(0.0, 0.0f)];
+                [self.bookmarkBGView setAlpha:1.0];
+            } completion:^(BOOL finished) {
+                
+            }];
+        }
+        
+        //changed to light bookmark
+        [self.textField setTintColor:UIColorFromRGB(ColorDarkBG)];
+        [self.textField setTextColor:UIColorFromRGB(ColorDarkBG)];
     }else {
         [self.bookmarkBGView setHidden:YES];
+        
+        //reset
+        [self.textField setTintColor:[UIColor whiteColor]];
+        [self.textField setTextColor:UIColorFromRGB(0xFAFAFA)];
     }
 }
 
 #pragma mark - Notification
 - (void)textDidUpdateCallback {
-    [self checkForPrefixAnimated:YES];
+    [self checkIfBookmark:YES];
     
     if ([self.delegate respondsToSelector:@selector(didUpdateWithText:cellIndex:)]) {
         [self.delegate didUpdateWithText:self.textField.text cellIndex:self.cellIndex];
