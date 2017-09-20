@@ -240,11 +240,15 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
         //                self.itemsArray = [NSMutableArray arrayWithArray:tempObjectsArray];
         
     }else {
+        ListItem *highlightedItem = [ListItem itemWithText:@"Double tap to highlight anything 👆👆"];
+        highlightedItem.isHighlighted  = YES;
+        
         NSArray *startArray = @[[ListItem itemWithText:@"Swipe 👉 or 👈 to send this to past"],
                                 [ListItem itemWithText:@"Pull down this list to see past stuff ⏬"],
+                                [ListItem itemWithText:@"# 👈 Prefix with # to bookmark"],
                                 [ListItem itemWithText:@"Double tap to highlight anything 👆👆"],
-                                [ListItem itemWithText:@"# 👈 Prefix stuff with #"],
-                                [ListItem itemWithText:@"Be awesome now 😘"]
+                                highlightedItem,
+                                [ListItem itemWithText:@"Be awesome now 😎"]
                                 ];
         self.itemsArray = [[NSMutableArray alloc]initWithArray:startArray];
     }

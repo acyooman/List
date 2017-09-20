@@ -22,7 +22,7 @@
 /* Begin PBXFileReference section */
 		E82AED4E1F6E31BD00F2AA9C /* ListItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ListItem.h; sourceTree = "<group>"; };
 		E82AED4F1F6E31BD00F2AA9C /* ListItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ListItem.m; sourceTree = "<group>"; };
-		E843A53F1F6ADD64000F53BC /* List.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = List.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E843A53F1F6ADD64000F53BC /* Listix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Listix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E843A5421F6ADD64000F53BC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		E843A5431F6ADD64000F53BC /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		E843A5451F6ADD64000F53BC /* ListViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ListViewController.h; sourceTree = "<group>"; };
@@ -64,7 +64,7 @@
 		E843A5401F6ADD64000F53BC /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E843A53F1F6ADD64000F53BC /* List.app */,
+				E843A53F1F6ADD64000F53BC /* Listix.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -122,9 +122,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E843A53E1F6ADD64000F53BC /* List */ = {
+		E843A53E1F6ADD64000F53BC /* Listix */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E843A5551F6ADD65000F53BC /* Build configuration list for PBXNativeTarget "List" */;
+			buildConfigurationList = E843A5551F6ADD65000F53BC /* Build configuration list for PBXNativeTarget "Listix" */;
 			buildPhases = (
 				E843A53B1F6ADD64000F53BC /* Sources */,
 				E843A53C1F6ADD64000F53BC /* Frameworks */,
@@ -134,9 +134,9 @@
 			);
 			dependencies = (
 			);
-			name = List;
+			name = Listix;
 			productName = List;
-			productReference = E843A53F1F6ADD64000F53BC /* List.app */;
+			productReference = E843A53F1F6ADD64000F53BC /* Listix.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -167,7 +167,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E843A53E1F6ADD64000F53BC /* List */,
+				E843A53E1F6ADD64000F53BC /* Listix */,
 			);
 		};
 /* End PBXProject section */
@@ -353,7 +353,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E843A5551F6ADD65000F53BC /* Build configuration list for PBXNativeTarget "List" */ = {
+		E843A5551F6ADD65000F53BC /* Build configuration list for PBXNativeTarget "Listix" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E843A5561F6ADD65000F53BC /* Debug */,
