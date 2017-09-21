@@ -11,7 +11,11 @@
 #import "CommonFunctions.h"
 #import "AABookmarkView.h"
 
-@interface ListTableViewCell () <UITextFieldDelegate, UIGestureRecognizerDelegate, ItemTextFieldDelegate>
+@interface ListTableViewCell () <UITextFieldDelegate, UIGestureRecognizerDelegate, ItemTextFieldDelegate> {
+    UIColor *highlightButtonColorEmpty;
+    UIColor *highlightButtonColorFill;
+
+}
 
 @property (nonatomic, strong) ItemTextField *textField;
 @property (nonatomic, strong) UIView *containerView;
@@ -30,11 +34,12 @@
 @property (nonatomic, strong) UIButton *deleteButton;
 @property (nonatomic, strong) UIButton *restoreButton;
 
-@property (nonatomic, strong) UITapGestureRecognizer *doubleTapGesture;
-
 @property (nonatomic) NSInteger backspaceCount;
 
 @property (nonatomic, strong) AABookmarkView *bookmarkBGView;
+
+@property (nonatomic, strong) UIButton *highlightButtonLeft;
+@property (nonatomic, strong) UIButton *highlightButtonRight;
 
 @end
 
@@ -53,9 +58,13 @@
 
 - (void)setDefaults {
     [self setSelectionStyle:UITableViewCellSelectionStyleNone];
-    [self setShouldStandOut:NO doubleTapped:NO];
+    [self setShouldStandOut:NO isUserAction:NO];
     [self setBackgroundColor:[UIColor clearColor]];
     self.backspaceCount = 0;
+    
+    //colors
+    highlightButtonColorEmpty = UIColorFromRGBWithAlpha(ColorHighlight, 0.8f);
+    highlightButtonColorFill = UIColorFromRGBWithAlpha(ColorWhite, 0.8f);
 }
 
 - (void)createViews {
@@ -105,7 +114,7 @@
     [self.containerView addSubview:self.bookmarkBGView];
     
     //text field
-    self.textField = [[ItemTextField alloc] initWithFrame:CGRectMake(24, 20, [CommonFunctions getPhoneWidth]-40, 24)];
+     self.textField = [[ItemTextField alloc] initWithFrame:CGRectMake(24, 20, [CommonFunctions getPhoneWidth]-40, 24)];
     [self.containerView addSubview:self.textField];
     [self.textField setDelegate:self];
     
@@ -118,13 +127,24 @@
     //text field - keyboard
     [self.textField setKeyboardType:UIKeyboardTypeDefault];
     [self.textField setKeyboardAppearance:UIKeyboardAppearanceDark];
-//    [self.textField setAdjustsFontSizeToFitWidth:YES];
+    //    [self.textField setAdjustsFontSizeToFitWidth:YES];
     [self.textField setReturnKeyType:UIReturnKeyNext];
     
-    //DOUBLE TAP GESTURE
-    self.doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureCallback)];
-    [self.doubleTapGesture setNumberOfTapsRequired:2];
-    [self.containerView addGestureRecognizer:self.doubleTapGesture];
+    //highlight button
+    self.highlightButtonLeft = [UIButton buttonWithType:UIButtonTypeSystem];
+    [self.highlightButtonLeft setFrame:CGRectMake(0.0f, 0.0f, 120.0f, 70)];
+    [self.highlightButtonLeft addTarget:self action:@selector(didTapHighlightButton) forControlEvents:UIControlEventTouchUpInside];
+    [self.highlightButtonLeft setBackgroundColor:UIColorFromRGB(ColorRed)];
+    [self.highlightButtonLeft setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
+    [self.highlightButtonLeft setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
+    //    [self.highlightButton setHitTestEdgeInsets:UIEdgeInsetsMake(0, 0, 0, 44)];
+    [self.highlightButtonLeft setTitle:@"◦" forState:UIControlStateNormal];
+    [self.highlightButtonLeft setTitleEdgeInsets:UIEdgeInsetsMake(0, 7.0f, 0.0, 0.0)];
+    [self.highlightButtonLeft.titleLabel setBaselineAdjustment:UIBaselineAdjustmentAlignCenters];
+    [self.highlightButtonLeft.titleLabel setFont:[UIFont preferredFontForTextStyle:UIFontTextStyleTitle3]];
+    [self.highlightButtonLeft setTitleColor:UIColorFromRGBWithAlpha(ColorHighlight, 0.8f) forState:UIControlStateNormal];
+    [self.highlightButtonLeft setBackgroundColor:[UIColor clearColor]];
+    [self.containerView addSubview:self.highlightButtonLeft];
 }
 
 - (UIButton *)getListButtonWithX:(CGFloat)x text:(NSString *)text {
@@ -145,6 +165,7 @@
     
     [self.containerView setFrame:self.bounds];
     [self.highlightingLayer setFrame:self.bounds];
+    [self.highlightButtonLeft setFrameHeight:self.bounds.size.height];
     [self.bookmarkBGView setCenterY:self.bounds.size.height/2];
     [self.containerView setTransform:CGAffineTransformIdentity];
     [self.textField setFrame:CGRectMake(24, 20, [CommonFunctions getPhoneWidth]-40, 24)];
@@ -282,24 +303,37 @@
     }
 }
 
-#pragma mark - Double Tap Interaction
+#pragma mark - Double Tap Interaction Highlight
+- (void)didTapHighlightButton {
+    if (self.listItem.isDone) {
+        return;
+    }
+    self.isStandingOut = !self.isStandingOut;
+    [self setShouldStandOut:self.isStandingOut isUserAction:YES];
+}
+
 - (void)doubleTapGestureCallback {
     if (self.listItem.isDone) {
         return;
     }
     self.isStandingOut = !self.isStandingOut;
-    [self setShouldStandOut:self.isStandingOut doubleTapped:YES];
+    [self setShouldStandOut:self.isStandingOut isUserAction:YES];
+    [self.textField resignFirstResponder];
 }
 
 #pragma mark - Reuse
 - (void)prepareForReuse {
     [super prepareForReuse];
     self.backspaceCount = 0;
-    [self setShouldStandOut:NO doubleTapped:NO];
+    [self setShouldStandOut:NO isUserAction:NO];
     self.textField.text = @"";
     [self.bookmarkBGView setHidden:YES];
     [self.containerView setTransform:CGAffineTransformIdentity];
     [self.containerView setAlpha:1.0f];
+    
+    //highlighting buttons
+    [self.highlightButtonLeft setHidden:YES];
+    [self.highlightButtonRight setHidden:YES];
     
     //if changed for bookmark
     [self.textField setTintColor:[UIColor whiteColor]];
@@ -308,11 +342,6 @@
 
 #pragma mark - Helpers
 - (NSArray *)getGradientForBookmark {
-    //    /* Rectangle 5: */
-    //    background-image: linear-gradient(-90deg, #FFFFFF 0%, #EFEFEF 100%);
-    //    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.50);
-    //    border-radius: 4px 4px 5px 4px 4px;
-    //
     return [NSArray arrayWithObjects:(id)[UIColorFromRGB(0xFFFFFF) CGColor], (id)[UIColorFromRGB(0xEFEFEF) CGColor], nil];
 }
 
@@ -350,15 +379,34 @@
 
 
 #pragma mark - Setters
-- (void)setShouldStandOut:(BOOL)shouldStandOut doubleTapped:(BOOL)isDoubleTapped {
+
+- (void)setShouldStandOut:(BOOL)shouldStandOut isUserAction:(BOOL)isUserAction {
+    
+    if ([self.listItem.text hasPrefix:@"#"]) {
+        //sanity checks to prevent bookmarks from highlight
+        shouldStandOut = NO;
+    }
+    
     self.isStandingOut = shouldStandOut;
     
-    if (isDoubleTapped) {
+    if (isUserAction) {
+        //animate in case of user action
+        
+        [self.highlightingLayer setOpacity:!shouldStandOut?1.0f:0.0f];
         [self.highlightingLayer setOpacity:!shouldStandOut?1.0f:0.0f];
         [self.highlightingLayer setHidden:NO];
+        
         [UIView animateWithDuration:0.4f animations:^{
             [self.highlightingLayer setOpacity:shouldStandOut?1.0f:0.0f];
             [self.textField setAlpha:shouldStandOut?1.0f:0.9f];
+            
+            if (shouldStandOut) {
+                [self.highlightButtonLeft setTitleColor:highlightButtonColorFill forState:UIControlStateNormal];
+                [self.highlightButtonLeft setTitle:@"•" forState:UIControlStateNormal];
+            }else {
+                [self.highlightButtonLeft setTitleColor:highlightButtonColorEmpty forState:UIControlStateNormal];
+                [self.highlightButtonLeft setTitle:@"◦" forState:UIControlStateNormal];
+            }
         } completion:^(BOOL finished) {
             if(!shouldStandOut) {
                 [self.highlightingLayer setHidden:YES];
@@ -373,6 +421,14 @@
     }else {
         [self.highlightingLayer setHidden:!shouldStandOut];
         [self.textField setAlpha:shouldStandOut?1.0f:0.9f];
+        
+        if (shouldStandOut) {
+            [self.highlightButtonLeft setTitleColor:highlightButtonColorFill forState:UIControlStateNormal];
+            [self.highlightButtonLeft setTitle:@"•" forState:UIControlStateNormal];
+        }else {
+            [self.highlightButtonLeft setTitleColor:highlightButtonColorEmpty forState:UIControlStateNormal];
+            [self.highlightButtonLeft setTitle:@"◦" forState:UIControlStateNormal];
+        }
     }
 }
 
@@ -380,25 +436,34 @@
     _listItem = listItem;
     [self.textField setText:listItem.text];
     [self setCellDoneStuff:listItem.isDone];
+    
+    //highlight buttons enable/disable
+    [self updateHighlightButtons];
+    
 }
 
 - (void)setCellDoneStuff:(BOOL)isDone {
     if (isDone) {
-        [self setShouldStandOut:NO doubleTapped:NO];
+        [self setShouldStandOut:NO isUserAction:NO];
         [self.containerView setBackgroundColor:UIColorFromRGB(ColorLessDarkBG)];
         [self.contentView setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
         [self.textField setEnabled:NO];
         [self.restoreButton setAlpha:1.0f];
         [self.deleteButton setAlpha:1.0f];
         [self.bookmarkBGView setHidden:YES];
+        [self.highlightButtonLeft setHidden:YES];
+        [self.highlightButtonRight setHidden:YES];
         [self setUserInteractionEnabled:NO]; //TODO:CELL REMOVE STUFF
     }else {
-        [self setShouldStandOut:self.listItem.isHighlighted doubleTapped:NO];
+        [self setShouldStandOut:self.listItem.isHighlighted isUserAction:NO];
         [self.textField setEnabled:YES];
         [self.containerView setBackgroundColor:UIColorFromRGB(ColorDarkBG)];
         [self.contentView setBackgroundColor:UIColorFromRGB(ColorLessDarkBG)];
         [self.restoreButton setAlpha:0.0f];
         [self.deleteButton setAlpha:0.0f];
+        
+        [self.highlightButtonLeft setHidden:NO];
+        [self.highlightButtonRight setHidden:NO];
         [self checkIfBookmark:NO];
         [self setUserInteractionEnabled:YES]; //TODO:CELL REMOVE STUFF
     }
@@ -431,11 +496,26 @@
         [self.textField setTintColor:[UIColor whiteColor]];
         [self.textField setTextColor:UIColorFromRGB(0xFAFAFA)];
     }
+    
+    [self updateHighlightButtons];
 }
 
 #pragma mark - Notification
+-(void)updateHighlightButtons{
+    //highlight buttons enable/disable
+    BOOL isEmpty = (self.textField.text.length == 0);
+    BOOL isBookmark = [self.textField.text hasPrefix:@"#"];
+    BOOL shouldHide = isEmpty || isBookmark || self.listItem.isDone;
+    
+    [self.highlightButtonLeft setHidden:shouldHide];
+    [self.highlightButtonRight setHidden:shouldHide];
+}
+
 - (void)textDidUpdateCallback {
     [self checkIfBookmark:YES];
+    
+    //highlight buttons enable/disable
+    [self updateHighlightButtons];
     
     if ([self.delegate respondsToSelector:@selector(didUpdateWithText:cellIndex:)]) {
         [self.delegate didUpdateWithText:self.textField.text cellIndex:self.cellIndex];

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E805E0331F73F5BC005F8E7B /* UIButton+HitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E805E0311F73F5BC005F8E7B /* UIButton+HitTest.m */; };
 		E82AED501F6E31BD00F2AA9C /* ListItem.m in Sources */ = {isa = PBXBuildFile; fileRef = E82AED4F1F6E31BD00F2AA9C /* ListItem.m */; };
 		E843A5441F6ADD64000F53BC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E843A5431F6ADD64000F53BC /* AppDelegate.m */; };
 		E843A5471F6ADD64000F53BC /* ListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E843A5461F6ADD64000F53BC /* ListViewController.m */; };
@@ -20,6 +21,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E805E0311F73F5BC005F8E7B /* UIButton+HitTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "UIButton+HitTest.m"; path = "Categories/UIButton+HitTest.m"; sourceTree = "<group>"; };
+		E805E0321F73F5BC005F8E7B /* UIButton+HitTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "UIButton+HitTest.h"; path = "Categories/UIButton+HitTest.h"; sourceTree = "<group>"; };
 		E82AED4E1F6E31BD00F2AA9C /* ListItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ListItem.h; sourceTree = "<group>"; };
 		E82AED4F1F6E31BD00F2AA9C /* ListItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ListItem.m; sourceTree = "<group>"; };
 		E843A53F1F6ADD64000F53BC /* Listix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Listix.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -53,6 +56,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E805E02E1F73F16E005F8E7B /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Categories;
+			sourceTree = "<group>";
+		};
 		E843A5361F6ADD64000F53BC = {
 			isa = PBXGroup;
 			children = (
@@ -111,10 +121,13 @@
 		E843A55D1F6AE090000F53BC /* Commons */ = {
 			isa = PBXGroup;
 			children = (
+				E805E02E1F73F16E005F8E7B /* Categories */,
 				E843A56B1F6AE257000F53BC /* CommonFunctions.h */,
 				E843A56C1F6AE257000F53BC /* CommonFunctions.m */,
 				E867D5E31F6E7DED004FB9D2 /* UIView+Shorthands.h */,
 				E867D5E21F6E7DED004FB9D2 /* UIView+Shorthands.m */,
+				E805E0321F73F5BC005F8E7B /* UIButton+HitTest.h */,
+				E805E0311F73F5BC005F8E7B /* UIButton+HitTest.m */,
 			);
 			path = Commons;
 			sourceTree = "<group>";
@@ -197,6 +210,7 @@
 				E843A5521F6ADD65000F53BC /* main.m in Sources */,
 				E843A5441F6ADD64000F53BC /* AppDelegate.m in Sources */,
 				E843A56D1F6AE257000F53BC /* CommonFunctions.m in Sources */,
+				E805E0331F73F5BC005F8E7B /* UIButton+HitTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,6 +331,7 @@
 				INFOPLIST_FILE = List/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				OTHER_LDFLAGS = "-objC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.acyooman.List;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -334,6 +349,7 @@
 				INFOPLIST_FILE = List/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				OTHER_LDFLAGS = "-objC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.acyooman.List;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

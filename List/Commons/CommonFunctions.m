@@ -29,6 +29,7 @@
 
 NSInteger const ColorDarkBG = 0x1B1B1E;
 NSInteger const ColorLessDarkBG = 0x555559;
+NSInteger const ColorHighlight = 0x673BEC;
 NSInteger const ColorSeparator = 0x343438; //0x27272A
 
 NSInteger const ColorJetBlack = 0x000000;

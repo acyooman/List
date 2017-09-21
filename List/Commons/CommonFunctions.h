@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "UIView+Shorthands.h"
+#import "UIButton+HitTest.h"
 
 #define UIColorFromRGB(rgbValue) \
 [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 \
@@ -62,6 +63,8 @@ extern NSInteger const ColorParagraphGrey;
 
 extern NSInteger const ColorHomeBackGround;
 extern NSInteger const ColorLightBlue;
+
+extern NSInteger const ColorHighlight;
 
 @interface CommonFunctions : NSObject
 + (CGFloat)getPhoneWidth;
