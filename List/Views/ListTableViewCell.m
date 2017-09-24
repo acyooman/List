@@ -14,7 +14,7 @@
 @interface ListTableViewCell () <UITextFieldDelegate, UIGestureRecognizerDelegate, ItemTextFieldDelegate> {
     UIColor *highlightButtonColorEmpty;
     UIColor *highlightButtonColorFill;
-
+    
 }
 
 @property (nonatomic, strong) ItemTextField *textField;
@@ -114,7 +114,7 @@
     [self.containerView addSubview:self.bookmarkBGView];
     
     //text field
-     self.textField = [[ItemTextField alloc] initWithFrame:CGRectMake(24, 20, [CommonFunctions getPhoneWidth]-40, 24)];
+    self.textField = [[ItemTextField alloc] initWithFrame:CGRectMake(24, 20, [CommonFunctions getPhoneWidth]-40, 24)];
     [self.containerView addSubview:self.textField];
     [self.textField setDelegate:self];
     
@@ -218,7 +218,7 @@
 #pragma mark  - Pan Gesture Stuff
 - (void)panGestureCallback:(UIPanGestureRecognizer *)gestureRecognizer {
     CGPoint translatedPoint = [gestureRecognizer translationInView:self];
-        CGPoint velocityInView = [gestureRecognizer velocityInView:self];
+    CGPoint velocityInView = [gestureRecognizer velocityInView:self];
     CGFloat dismissThresh = [CommonFunctions getPhoneWidth]/2;
     
     switch (gestureRecognizer.state) {
@@ -391,7 +391,7 @@
     
     if (isUserAction) {
         //animate in case of user action
-        
+        //        [self.highlightingLayer setAffineTransform:CGAffineTransformMakeTranslation(shouldStandOut?-10:0.0f, 0.0f)];
         [self.highlightingLayer setOpacity:!shouldStandOut?1.0f:0.0f];
         [self.highlightingLayer setOpacity:!shouldStandOut?1.0f:0.0f];
         [self.highlightingLayer setHidden:NO];
@@ -399,7 +399,7 @@
         [UIView animateWithDuration:0.4f animations:^{
             [self.highlightingLayer setOpacity:shouldStandOut?1.0f:0.0f];
             [self.textField setAlpha:shouldStandOut?1.0f:0.9f];
-            
+            //            [self.highlightingLayer setAffineTransform:CGAffineTransformMakeTranslation(!shouldStandOut?-10:0.0f, 0.0f)];
             if (shouldStandOut) {
                 [self.highlightButtonLeft setTitleColor:highlightButtonColorFill forState:UIControlStateNormal];
                 [self.highlightButtonLeft setTitle:@"•" forState:UIControlStateNormal];

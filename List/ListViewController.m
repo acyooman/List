@@ -243,13 +243,14 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
         ListItem *highlightedItem = [ListItem itemWithText:@"Double tap to highlight anything 👆👆"];
         highlightedItem.isHighlighted  = YES;
         
-        NSArray *startArray = @[[ListItem itemWithText:@"Swipe 👉 or 👈 to send this to past"],
-                                [ListItem itemWithText:@"Pull down this list to see past stuff ⏬"],
-                                [ListItem itemWithText:@"# 👈 Prefix with # to bookmark"],
-                                [ListItem itemWithText:@"Double tap to highlight anything 👆👆"],
-                                highlightedItem,
-                                [ListItem itemWithText:@"Be awesome now 😎"]
-                                ];
+        NSArray *startArray = @[[ListItem itemWithText:@"# Listix app launch stuff 🚀"],
+                                 [ListItem itemWithText:@"Eat. Sleep. Code. Repeat. 👨‍💻"],
+                                 [ListItem itemWithText:@"Get emails of people who are interested"],
+                                 [ListItem itemWithText:@"Test on all iPhones 📱"],
+                                 [ListItem itemWithText:@"Upload to the AppStore "],
+                                 [ListItem itemWithText:@"Release this to the world"],
+                                 [ListItem itemWithText:@"Party hard 🎉"]];
+                                
         self.itemsArray = [[NSMutableArray alloc]initWithArray:startArray];
     }
     
