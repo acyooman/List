@@ -21,10 +21,14 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		E805E0311F73F5BC005F8E7B /* UIButton+HitTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "UIButton+HitTest.m"; path = "Categories/UIButton+HitTest.m"; sourceTree = "<group>"; };
-		E805E0321F73F5BC005F8E7B /* UIButton+HitTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "UIButton+HitTest.h"; path = "Categories/UIButton+HitTest.h"; sourceTree = "<group>"; };
+		E805E0311F73F5BC005F8E7B /* UIButton+HitTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIButton+HitTest.m"; sourceTree = "<group>"; };
+		E805E0321F73F5BC005F8E7B /* UIButton+HitTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIButton+HitTest.h"; sourceTree = "<group>"; };
 		E82AED4E1F6E31BD00F2AA9C /* ListItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ListItem.h; sourceTree = "<group>"; };
 		E82AED4F1F6E31BD00F2AA9C /* ListItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ListItem.m; sourceTree = "<group>"; };
+		E83676851F775CD2008C7924 /* UIView+AutoLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIView+AutoLayout.h"; sourceTree = "<group>"; };
+		E83676861F775CD2008C7924 /* UIView+AutoLayout.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIView+AutoLayout.m"; sourceTree = "<group>"; };
+		E83676891F775E02008C7924 /* LXMetrics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LXMetrics.h; sourceTree = "<group>"; };
+		E836768A1F775E02008C7924 /* LXMetrics.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LXMetrics.m; sourceTree = "<group>"; };
 		E843A53F1F6ADD64000F53BC /* Listix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Listix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E843A5421F6ADD64000F53BC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		E843A5431F6ADD64000F53BC /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -59,8 +63,38 @@
 		E805E02E1F73F16E005F8E7B /* Categories */ = {
 			isa = PBXGroup;
 			children = (
+				E83676841F775CD2008C7924 /* Autolayout */,
+				E867D5E31F6E7DED004FB9D2 /* UIView+Shorthands.h */,
+				E867D5E21F6E7DED004FB9D2 /* UIView+Shorthands.m */,
+				E805E0321F73F5BC005F8E7B /* UIButton+HitTest.h */,
+				E805E0311F73F5BC005F8E7B /* UIButton+HitTest.m */,
 			);
 			path = Categories;
+			sourceTree = "<group>";
+		};
+		E83676841F775CD2008C7924 /* Autolayout */ = {
+			isa = PBXGroup;
+			children = (
+				E83676851F775CD2008C7924 /* UIView+AutoLayout.h */,
+				E83676861F775CD2008C7924 /* UIView+AutoLayout.m */,
+			);
+			path = Autolayout;
+			sourceTree = "<group>";
+		};
+		E83676871F775D8E008C7924 /* Metrics */ = {
+			isa = PBXGroup;
+			children = (
+				E83676891F775E02008C7924 /* LXMetrics.h */,
+				E836768A1F775E02008C7924 /* LXMetrics.m */,
+			);
+			path = Metrics;
+			sourceTree = "<group>";
+		};
+		E83676881F775DC5008C7924 /* Colors */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Colors;
 			sourceTree = "<group>";
 		};
 		E843A5361F6ADD64000F53BC = {
@@ -121,13 +155,11 @@
 		E843A55D1F6AE090000F53BC /* Commons */ = {
 			isa = PBXGroup;
 			children = (
+				E83676881F775DC5008C7924 /* Colors */,
+				E83676871F775D8E008C7924 /* Metrics */,
 				E805E02E1F73F16E005F8E7B /* Categories */,
 				E843A56B1F6AE257000F53BC /* CommonFunctions.h */,
 				E843A56C1F6AE257000F53BC /* CommonFunctions.m */,
-				E867D5E31F6E7DED004FB9D2 /* UIView+Shorthands.h */,
-				E867D5E21F6E7DED004FB9D2 /* UIView+Shorthands.m */,
-				E805E0321F73F5BC005F8E7B /* UIButton+HitTest.h */,
-				E805E0311F73F5BC005F8E7B /* UIButton+HitTest.m */,
 			);
 			path = Commons;
 			sourceTree = "<group>";
