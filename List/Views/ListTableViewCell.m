@@ -18,6 +18,7 @@
 }
 
 @property (nonatomic, strong) ItemTextField *textField;
+
 @property (nonatomic, strong) UIView *containerView;
 @property (nonatomic, strong) CAGradientLayer *highlightingLayer;
 
@@ -85,7 +86,6 @@
     [self.bgGradientLayer setFrame:self.bounds];
     [self.bgGradientLayer setStartPoint:CGPointMake(0.0, 0.5)];
     [self.bgGradientLayer setEndPoint:CGPointMake(1.0, 0.5)];
-    [self.bgGradientLayer setHidden:YES];
     [self.bgGradientLayer setColors:[self getGradientForBackground]];
     [self.contentView.layer insertSublayer:self.bgGradientLayer atIndex:0];
     
@@ -134,7 +134,6 @@
     self.highlightButtonLeft = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.highlightButtonLeft setFrame:CGRectMake(0.0f, 0.0f, 120.0f, 70)];
     [self.highlightButtonLeft addTarget:self action:@selector(didTapHighlightButton) forControlEvents:UIControlEventTouchUpInside];
-    [self.highlightButtonLeft setBackgroundColor:UIColorFromRGB(ColorRed)];
     [self.highlightButtonLeft setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
     [self.highlightButtonLeft setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
     //    [self.highlightButton setHitTestEdgeInsets:UIEdgeInsetsMake(0, 0, 0, 44)];
@@ -145,6 +144,10 @@
     [self.highlightButtonLeft setTitleColor:UIColorFromRGBWithAlpha(ColorHighlight, 0.8f) forState:UIControlStateNormal];
     [self.highlightButtonLeft setBackgroundColor:[UIColor clearColor]];
     [self.containerView addSubview:self.highlightButtonLeft];
+}
+
+- (void)setConstraint {
+    
 }
 
 - (UIButton *)getListButtonWithX:(CGFloat)x text:(NSString *)text {

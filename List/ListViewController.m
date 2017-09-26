@@ -8,8 +8,9 @@
 
 #import "ListViewController.h"
 #import "CommonFunctions.h"
-#import "ListTableViewCell.h"
+//#import "ListTasbleViewCell.h"
 #import "ListItem.h"
+#import "ListItemTableViewCell.h"
 
 typedef NS_ENUM(NSInteger, PastSectionType) {
     PastSectionTypeToday,
@@ -20,7 +21,7 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     PastSectionTypeSomeYear
 };
 
-@interface ListViewController ()<UITableViewDataSource , UITableViewDelegate, ListTableViewCellDelegate, UIGestureRecognizerDelegate>
+@interface ListViewController ()<UITableViewDataSource , UITableViewDelegate, ListItemTableViewCellDelegate, UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) NSMutableArray *itemsArray;
 
@@ -194,51 +195,6 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
         NSData *data = [[NSUserDefaults standardUserDefaults] objectForKey:@"listItemsArray"];
         NSArray *savedArray = [NSKeyedUnarchiver unarchiveObjectWithData:data];
         self.itemsArray = [[NSMutableArray alloc] initWithArray:savedArray];
-    
-        //        //list strings
-        //            if([[NSUserDefaults standardUserDefaults] valueForKey:@"listArrayData"]){
-        //                NSMutableArray *diskArray = [[NSMutableArray alloc] init];
-        //                diskArray = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] valueForKey:@"listArrayData"]];
-        //
-        //                //done values
-        //                NSMutableArray *doneValuesArray = [[NSMutableArray alloc] init];
-        //                if([[NSUserDefaults standardUserDefaults] valueForKey:@"doneValuesData"]){
-        //                    doneValuesArray = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] valueForKey:@"doneValuesData"]];
-        //                }else {
-        //                    for (NSInteger i=0; i<diskArray.count; i++) {
-        //                        [doneValuesArray addObject:@(0)];
-        //                    }
-        //                }
-        //
-        //                //highlights
-        //                NSMutableArray *highlightsArray = [[NSMutableArray alloc] init];
-        //                if([[NSUserDefaults standardUserDefaults] valueForKey:@"highlightsData"]){
-        //                    highlightsArray = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] valueForKey:@"highlightsData"]];
-        //                }else {
-        //                    for (NSInteger i=0; i<diskArray.count; i++) {
-        //                        [highlightsArray addObject:@(0)];
-        //                    }
-        //                }
-        //
-        //                //temp array
-        //                NSMutableArray *tempObjectsArray = [[NSMutableArray alloc] init];
-        //
-        //                //strings
-        //                for (NSInteger i=0;i<diskArray.count;i++) {
-        //                    NSString *stringObj = [diskArray objectAtIndex:i];
-        //                    ListItem *listItem = [ListItem itemWithText:stringObj];
-        //
-        //                    NSNumber *tempNumber = [highlightsArray objectAtIndex:i];
-        //                    listItem.isHighlighted = tempNumber.boolValue;
-        //
-        //                    tempNumber = [doneValuesArray objectAtIndex:i];
-        //                    listItem.isDone = tempNumber.boolValue;
-        //
-        //                    [tempObjectsArray addObject:listItem];
-        //                }
-        //
-        //                self.itemsArray = [NSMutableArray arrayWithArray:tempObjectsArray];
-        
     }else {
         ListItem *highlightedItem = [ListItem itemWithText:@"Double tap to highlight anything 👆👆"];
         highlightedItem.isHighlighted  = YES;
@@ -346,9 +302,9 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (tableView == self.listTableView) {
-        ListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"itemCell"];
+        ListItemTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"itemCell"];
         if (!cell) {
-            cell = [[ListTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"itemCell"];
+            cell = [[ListItemTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"itemtablCell"];
         }
         ListItem *item = [self.itemsArray objectAtIndex:indexPath.row];
         if (!item.isDone) {
@@ -382,9 +338,9 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     }
     
     else {
-        ListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"pastItemCell"];
+        ListItemTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"pastItemCell"];
         if (!cell) {
-            cell = [[ListTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"pastItemCell"];
+            cell = [[ListItemTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"pastItemCell"];
             [cell setSeparatorInset:UIEdgeInsetsMake(0, 24, 0, 24)];
         }
         
@@ -508,7 +464,6 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     
 }
 
-
 - (void)copyListToPasteboardWithDone:(BOOL)doneFlag{
     NSMutableString *string = [[NSMutableString alloc] init];
     
@@ -612,7 +567,6 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
 - (void)minimizeListContainer {
     [UIView animateWithDuration:0.9f delay:0.0f usingSpringWithDamping:0.95f initialSpringVelocity:0.3f options:UIViewAnimationOptionCurveEaseInOut|UIViewAnimationOptionAllowUserInteraction animations:^{
         [self.listContainerView setFrameY:[CommonFunctions getPhoneHeight] - 114.0f];
-        [self.statusBarBGToolbar setTintColor:UIColorFromRGB(ColorOrange)];
         [self.pastContainerView setFrameY:0.0f];
     } completion:^(BOOL finished) {
         [self.listSwipeGesture setEnabled:YES];
@@ -855,4 +809,11 @@ typedef NS_ENUM(NSInteger, PastSectionType) {
     }
     return array;
 }
+
+#pragma mark - ListItemTableViewDelegate methods
+- (void)didAdjustHeight {
+    [self.listTableView beginUpdates];
+    [self.listTableView endUpdates];
+}
+
 @end

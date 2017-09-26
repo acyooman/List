@@ -1,17 +1,16 @@
-
 //
 //  UIView+AutoLayout.m
-//  Zomato
+//  List
 //
-//  Created by Anurag on 27/04/17.
-//  Copyright © 2017 Zomato Media Pvt. Ltd. All rights reserved.
+//  Created by Arpit Agarwal on 19/09/17.
+//  Copyright © 2017 acyooman. All rights reserved.
 //
 
 #import "UIView+AutoLayout.h"
 #import <objc/runtime.h>
 
-NSString *kHeightIdentifier = @"zHeightIdentifier";
-NSString *kWidthIdentifier = @"zWidthIdentifier";
+NSString *kHeightIdentifier = @"lxHeightIdentifier";
+NSString *kWidthIdentifier = @"lxWidthIdentifier";
 
 @implementation UIView (AutoLayout)
 @dynamic topConstraint, bottomConstraint, leadingConstraint, trailingConstraint, centerXConstraint, centerYConstraint, heightConstraint, widthConstraint;
@@ -353,7 +352,7 @@ NSString *kWidthIdentifier = @"zWidthIdentifier";
     self.translatesAutoresizingMaskIntoConstraints = NO;
     if (view == nil) {
         if (DEBUG) {
-            NSAssert(YES, @"View is nil! Please check your input");
+            NSAssert(YES, @"Passed and empty nil view");
         }
         return NO;
     }

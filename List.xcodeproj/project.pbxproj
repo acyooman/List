@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		E805E0331F73F5BC005F8E7B /* UIButton+HitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E805E0311F73F5BC005F8E7B /* UIButton+HitTest.m */; };
 		E82AED501F6E31BD00F2AA9C /* ListItem.m in Sources */ = {isa = PBXBuildFile; fileRef = E82AED4F1F6E31BD00F2AA9C /* ListItem.m */; };
+		E836768D1F77878D008C7924 /* ListItemTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = E836768C1F77878D008C7924 /* ListItemTextView.m */; };
+		E83676901F778CF0008C7924 /* ListItemTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E836768F1F778CEF008C7924 /* ListItemTableViewCell.m */; };
+		E83676911F779232008C7924 /* UIView+AutoLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = E83676861F775CD2008C7924 /* UIView+AutoLayout.m */; settings = {COMPILER_FLAGS = "-objC"; }; };
+		E83676951F77940C008C7924 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E83676941F77940C008C7924 /* MainViewController.m */; };
+		E83676981F779489008C7924 /* ListTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = E83676971F779489008C7924 /* ListTableView.m */; };
 		E843A5441F6ADD64000F53BC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E843A5431F6ADD64000F53BC /* AppDelegate.m */; };
 		E843A5471F6ADD64000F53BC /* ListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E843A5461F6ADD64000F53BC /* ListViewController.m */; };
 		E843A54C1F6ADD64000F53BC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E843A54B1F6ADD64000F53BC /* Assets.xcassets */; };
@@ -27,8 +32,14 @@
 		E82AED4F1F6E31BD00F2AA9C /* ListItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ListItem.m; sourceTree = "<group>"; };
 		E83676851F775CD2008C7924 /* UIView+AutoLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIView+AutoLayout.h"; sourceTree = "<group>"; };
 		E83676861F775CD2008C7924 /* UIView+AutoLayout.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIView+AutoLayout.m"; sourceTree = "<group>"; };
-		E83676891F775E02008C7924 /* LXMetrics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LXMetrics.h; sourceTree = "<group>"; };
-		E836768A1F775E02008C7924 /* LXMetrics.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LXMetrics.m; sourceTree = "<group>"; };
+		E836768B1F77878D008C7924 /* ListItemTextView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ListItemTextView.h; sourceTree = "<group>"; };
+		E836768C1F77878D008C7924 /* ListItemTextView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ListItemTextView.m; sourceTree = "<group>"; };
+		E836768E1F778CEF008C7924 /* ListItemTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ListItemTableViewCell.h; sourceTree = "<group>"; };
+		E836768F1F778CEF008C7924 /* ListItemTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ListItemTableViewCell.m; sourceTree = "<group>"; };
+		E83676931F77940C008C7924 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
+		E83676941F77940C008C7924 /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
+		E83676961F779489008C7924 /* ListTableView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ListTableView.h; sourceTree = "<group>"; };
+		E83676971F779489008C7924 /* ListTableView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ListTableView.m; sourceTree = "<group>"; };
 		E843A53F1F6ADD64000F53BC /* Listix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Listix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E843A5421F6ADD64000F53BC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		E843A5431F6ADD64000F53BC /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -81,20 +92,29 @@
 			path = Autolayout;
 			sourceTree = "<group>";
 		};
-		E83676871F775D8E008C7924 /* Metrics */ = {
-			isa = PBXGroup;
-			children = (
-				E83676891F775E02008C7924 /* LXMetrics.h */,
-				E836768A1F775E02008C7924 /* LXMetrics.m */,
-			);
-			path = Metrics;
-			sourceTree = "<group>";
-		};
 		E83676881F775DC5008C7924 /* Colors */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			path = Colors;
+			sourceTree = "<group>";
+		};
+		E83676921F7793F3008C7924 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				E83676931F77940C008C7924 /* MainViewController.h */,
+				E83676941F77940C008C7924 /* MainViewController.m */,
+			);
+			path = ViewControllers;
+			sourceTree = "<group>";
+		};
+		E83676991F779490008C7924 /* TableViews */ = {
+			isa = PBXGroup;
+			children = (
+				E83676961F779489008C7924 /* ListTableView.h */,
+				E83676971F779489008C7924 /* ListTableView.m */,
+			);
+			path = TableViews;
 			sourceTree = "<group>";
 		};
 		E843A5361F6ADD64000F53BC = {
@@ -116,6 +136,7 @@
 		E843A5411F6ADD64000F53BC /* List */ = {
 			isa = PBXGroup;
 			children = (
+				E8B003301F797F0E0022906E /* Manager */,
 				E843A55D1F6AE090000F53BC /* Commons */,
 				E843A5591F6ADDF1000F53BC /* Views */,
 				E843A5581F6ADDBB000F53BC /* Models */,
@@ -142,12 +163,19 @@
 		E843A5591F6ADDF1000F53BC /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E89724681F77D77900E2B097 /* CustomViews */,
+				E83676991F779490008C7924 /* TableViews */,
+				E83676921F7793F3008C7924 /* ViewControllers */,
 				E843A55A1F6AE06A000F53BC /* ListTableViewCell.h */,
 				E843A55B1F6AE06A000F53BC /* ListTableViewCell.m */,
 				E867D5E51F6E9536004FB9D2 /* ItemTextField.h */,
 				E867D5E61F6E9536004FB9D2 /* ItemTextField.m */,
 				E86A73A11F7193C10055D7E0 /* AABookmarkView.h */,
 				E86A73A21F7193C10055D7E0 /* AABookmarkView.m */,
+				E836768B1F77878D008C7924 /* ListItemTextView.h */,
+				E836768C1F77878D008C7924 /* ListItemTextView.m */,
+				E836768E1F778CEF008C7924 /* ListItemTableViewCell.h */,
+				E836768F1F778CEF008C7924 /* ListItemTableViewCell.m */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -156,12 +184,25 @@
 			isa = PBXGroup;
 			children = (
 				E83676881F775DC5008C7924 /* Colors */,
-				E83676871F775D8E008C7924 /* Metrics */,
 				E805E02E1F73F16E005F8E7B /* Categories */,
 				E843A56B1F6AE257000F53BC /* CommonFunctions.h */,
 				E843A56C1F6AE257000F53BC /* CommonFunctions.m */,
 			);
 			path = Commons;
+			sourceTree = "<group>";
+		};
+		E89724681F77D77900E2B097 /* CustomViews */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = CustomViews;
+			sourceTree = "<group>";
+		};
+		E8B003301F797F0E0022906E /* Manager */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Manager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -233,14 +274,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E83676911F779232008C7924 /* UIView+AutoLayout.m in Sources */,
 				E843A5471F6ADD64000F53BC /* ListViewController.m in Sources */,
 				E843A55C1F6AE06A000F53BC /* ListTableViewCell.m in Sources */,
+				E83676981F779489008C7924 /* ListTableView.m in Sources */,
+				E836768D1F77878D008C7924 /* ListItemTextView.m in Sources */,
 				E86A73A31F7193C20055D7E0 /* AABookmarkView.m in Sources */,
+				E83676901F778CF0008C7924 /* ListItemTableViewCell.m in Sources */,
 				E867D5E71F6E9536004FB9D2 /* ItemTextField.m in Sources */,
 				E82AED501F6E31BD00F2AA9C /* ListItem.m in Sources */,
 				E867D5E41F6E7DED004FB9D2 /* UIView+Shorthands.m in Sources */,
 				E843A5521F6ADD65000F53BC /* main.m in Sources */,
 				E843A5441F6ADD64000F53BC /* AppDelegate.m in Sources */,
+				E83676951F77940C008C7924 /* MainViewController.m in Sources */,
 				E843A56D1F6AE257000F53BC /* CommonFunctions.m in Sources */,
 				E805E0331F73F5BC005F8E7B /* UIButton+HitTest.m in Sources */,
 			);

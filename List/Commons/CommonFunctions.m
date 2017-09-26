@@ -27,6 +27,25 @@
 }
 
 
+//SIZES
+CGFloat const kPaddingSmallest = 8.0f;
+CGFloat const kPaddingSmall = 16.0f;
+CGFloat const kPaddingRegular = 24.0f;
+CGFloat const kPaddingLarge = 32.0;
+CGFloat const kPaddingLargest = 40.0f;
+
+CGFloat const kPadding80 = 80.0f;
+
+CGFloat const kCornerRadius2 = 2.0;
+CGFloat const kCornerRadius4 = 4.0;
+CGFloat const kCornerRadius8 = 8.0;
+
+CGFloat const kStandardCellHeight = 64.0;
+
+CGFloat const kTableBottomInset = 160.0;
+
+//COLORS
+NSInteger const ColorWhite = 0xFFFFFF;
 NSInteger const ColorDarkBG = 0x1B1B1E;
 NSInteger const ColorLessDarkBG = 0x555559;
 NSInteger const ColorHighlight = 0x673BEC;
@@ -43,19 +62,40 @@ NSInteger const ColorPink = 0xF64976;
 NSInteger const ColorYellow = 0xFFC900;
 NSInteger const ColorGold = 0xC17314;
 
-NSInteger const ColorRed = 0xE23744;
-NSInteger const ColorNonVeg = 0xE95A58;
-NSInteger const ColorWhite = 0xFFFFFF;
-NSInteger const ColorDisabled = 0xAAAAAA;
-NSInteger const ColorTreatsPink  = 0xF96579;
-NSInteger const ColorOrange = 0xF5A623;
-NSInteger const ColorGolden = 0xab9355;
-
 NSInteger const ColorDarkText = 0x0F1F2A;
 NSInteger const ColorParagraphGrey = 0x214A65;
 
 NSInteger const ColorHomeBackGround = 0xF7F7F4;
 NSInteger const ColorLightBlue = 0xE5F3FB;
 
-
++ (CAGradientLayer *)gradientLayerType:(GradientLayerType)type{
+    CAGradientLayer *gradientLayer = [CAGradientLayer layer];
+    
+    //left to right
+    gradientLayer.startPoint = CGPointMake(0.0, 0.5);
+    gradientLayer.endPoint = CGPointMake(1.0, 0.5);
+    
+    switch (type) {
+        case GradientLayerTypeDoneBg: {
+            //top to bottom
+            gradientLayer.startPoint = CGPointMake(0.5, 0);
+            gradientLayer.endPoint = CGPointMake(0.5, 1);
+            gradientLayer.colors = [NSArray arrayWithObjects:(id)[UIColorFromRGB(0x404045) CGColor], (id)[UIColorFromRGB(0x1E1E21) CGColor], nil];
+        }
+            break;
+            
+        case GradientLayerTypeListBg: {
+            //top to bottom
+            gradientLayer.startPoint = CGPointMake(0.5, 0);
+            gradientLayer.endPoint = CGPointMake(0.5, 1);
+            gradientLayer.colors = [NSArray arrayWithObjects:(id)[UIColorFromRGB(0x404045) CGColor], (id)[UIColorFromRGB(0x1E1E21) CGColor], nil];
+        }
+            break;
+            
+        default:
+            break;
+    }
+    
+    return gradientLayer;
+}
 @end
